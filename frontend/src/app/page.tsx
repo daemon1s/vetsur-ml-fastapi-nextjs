@@ -1,11 +1,13 @@
 "use client"
 import React, { useState, useEffect } from "react"
+import Link from "next/link"
 import { apiObj } from "@/lib/api"
-import { TarjetaKpi } from "@/components/tarjetas-kpi"
+import { TarjetaKpiML } from "@/components/tarjetas-kpi"
 import { GraficoSucursales } from "@/components/grafico-sucursales"
 import { GraficoEspecies } from "@/components/grafico-especies"
 import { TablaPacientes } from "@/components/tabla-pacientes"
 import { Badge } from "@/components/ui/badge"
+import { Activity, Brain, ChevronRight } from "lucide-react"
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null)
@@ -14,12 +16,12 @@ export default function Dashboard() {
   useEffect(() => {
     setMounted(true)
     const load = async () => {
-        try {
-            const res = await apiObj.obtenerEstadisticas()
-            setStats(res)
-        } catch (e) {
-            console.error("Error cargando stats:", e)
-        }
+      try {
+        const res = await apiObj.obtenerEstadisticas()
+        setStats(res)
+      } catch (e) {
+        console.error("Error cargando stats:", e)
+      }
     }
     load()
   }, [])
@@ -27,35 +29,79 @@ export default function Dashboard() {
   if (!mounted) return null
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-100 p-8">
-      <div className="max-w-7xl mx-auto w-full space-y-8">
-        
-        <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">VetSur Dashboard</h1>
-            <p className="text-slate-400 font-medium tracking-tight">Análisis inteligente de retención de pacientes</p>
+    <div className="flex min-h-screen w-full flex-col bg-background pattern-bg">
+      <div className="max-w-7xl mx-auto w-full space-y-6 p-6 lg:p-8">
+
+        {/* Header */}
+        <div className="flex justify-between items-center bg-card border border-border rounded-2xl px-6 py-4 shadow-lg animate-in-up">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-[#1D9E75]/10 border border-[#1D9E75]/20">
+              <Activity className="h-6 w-6 text-[#1D9E75]" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-foreground tracking-tight">VetSur</h1>
+            </div>
           </div>
-          <Badge className="bg-[#1D9E75] px-4 py-1 text-sm font-bold shadow-sm">Recall 90% (Live Model)</Badge>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/predictor"
+              className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-[#1D9E75] transition-colors border border-border rounded-lg px-3 py-2 hover:border-[#1D9E75]/40"
+            >
+              <Brain className="h-3.5 w-3.5" />
+              Predictor
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <TarjetaKpi titulo="Riesgo crítico" valor={String(stats?.kpis?.riesgo_alto ?? "...")} delta="Alto" icono="usuarios" positivo={false} />
-          <TarjetaKpi titulo="Inactivos 90d" valor={String(stats?.kpis?.visitas_90 ?? "...")} delta="Alerta" icono="calendario" positivo={false} />
-          <TarjetaKpi titulo="Tasa de retención" valor={stats?.kpis?.tasa_retencion ?? "..."} delta="KPI" icono="tendencia" positivo={true} />
-          <TarjetaKpi titulo="Recuperación" valor={String(stats?.kpis?.recuperados ?? "...")} delta="Meta" icono="actividad" positivo={true} />
+        {/* KPI Cards */}
+        <div className="grid gap-4 md:grid-cols-2 animate-in-up" style={{ animationDelay: "60ms" }}>
+          <TarjetaKpiML 
+            metricaPrincipal={{
+              label: "En Riesgo Alto",
+              valor: String(stats?.kpis?.riesgo_alto ?? "—"),
+              subtexto: "prob. > 0.70",
+              highlight: true
+            }}
+            metricaSecundaria={{
+              label: "Días Promedio",
+              valor: `${stats?.kpis?.promedio_dias_riesgo ?? "—"} días`,
+              subtexto: "sin visita (en riesgo)"
+            }}
+            icono={Activity}
+            color="#ef4444" 
+          />
+
+          <TarjetaKpiML 
+            metricaPrincipal={{
+              label: "Tasa de Retención",
+              valor: stats?.kpis?.tasa_retencion ?? "—",
+              subtexto: `sobre ${stats?.kpis?.total_pacientes ?? "—"} pacientes`,
+              highlight: true
+            }}
+            metricaSecundaria={{
+              label: "Recall del Modelo",
+              valor: stats?.kpis?.recall_modelo ?? "90%",
+              subtexto: "precisión de detección"
+            }}
+            icono={Brain}
+            color="#1D9E75"
+          />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-            <div className="bg-white p-2 rounded-2xl shadow-sm border overflow-hidden">
-                <GraficoSucursales data={stats?.sucursales} />
-            </div>
-            <div className="bg-white p-2 rounded-2xl shadow-sm border overflow-hidden">
-                <GraficoEspecies data={stats?.especies} />
-            </div>
+        {/* Gráficos */}
+        <div className="grid gap-4 md:grid-cols-2 animate-in-up" style={{ animationDelay: "120ms" }}>
+          <GraficoSucursales data={stats?.sucursales} />
+          <GraficoEspecies data={stats?.especies} />
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm border overflow-hidden">
-          <h2 className="text-xl font-bold mb-6 text-slate-800">Panel de acción CRM (pacientes reales)</h2>
+        {/* Tabla CRM */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg animate-in-up" style={{ animationDelay: "180ms" }}>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1 h-5 rounded-full bg-[#1D9E75]" />
+            <h2 className="text-base font-bold text-foreground">Panel de acción CRM</h2>
+            <span className="text-xs text-muted-foreground ml-1">· pacientes en riesgo</span>
+          </div>
           <TablaPacientes />
         </div>
 

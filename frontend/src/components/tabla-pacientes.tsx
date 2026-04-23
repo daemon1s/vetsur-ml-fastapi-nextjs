@@ -15,7 +15,7 @@ import type { PacienteRiesgo } from "@/types/vetsur"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Download, Search } from "lucide-react"
+import { Download, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 export function TablaPacientes() {
   const [data, setData] = useState<PacienteRiesgo[]>([])
@@ -31,27 +31,22 @@ export function TablaPacientes() {
 
   const colorBadge = (riesgo: string) => {
     switch (riesgo) {
-      case "Alto": return "bg-[#E24B4A]"
-      case "Medio": return "bg-[#BA7517]"
-      default: return "bg-[#1D9E75]"
+      case "Alto":  return "bg-destructive/15 text-destructive border border-destructive/30"
+      case "Medio": return "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+      default:      return "bg-[#1D9E75]/15 text-[#1D9E75] border border-[#1D9E75]/30"
     }
   }
 
   const exportarCSV = () => {
     const rows = table.getFilteredRowModel().rows.map(r => r.original)
     if (rows.length === 0) return
-
-    const headers = ["ID Paciente", "Especie", "Sucursal", "Días s/Visita", "Riesgo %", "Nivel", "Acción CRM"]
+    const headers = ["ID Paciente", "Especie", "Sucursal", "Días s/visita", "Riesgo %", "Nivel", "Acción CRM"]
     const csvData = rows.map(r => [
-      r.paciente_id,
-      r.especie,
-      r.sucursal,
+      r.paciente_id, r.especie, r.sucursal,
       r.dias_desde_ultima_visita,
       `${(r.probabilidad_abandono * 100).toFixed(1)}%`,
-      r.nivel_riesgo,
-      `"${r.accion_sugerida}"`
+      r.nivel_riesgo, `"${r.accion_sugerida}"`
     ])
-
     const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n")
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
@@ -64,16 +59,16 @@ export function TablaPacientes() {
   }
 
   const columns = [
-    { accessorKey: "paciente_id", header: "ID Paciente" },
+    { accessorKey: "paciente_id", header: "ID paciente" },
     { accessorKey: "especie", header: "Especie" },
     { accessorKey: "sucursal", header: "Sucursal" },
     { accessorKey: "dias_desde_ultima_visita", header: "Días sin visita" },
     {
       accessorKey: "probabilidad_abandono",
-      header: "Riesgo (%)",
+      header: "Riesgo %",
       cell: ({ row }: any) => {
         const val = row.getValue("probabilidad_abandono") as number
-        return <span className="font-semibold text-slate-900">{(val * 100).toFixed(1)}%</span>
+        return <span className="font-bold text-foreground tabular-nums">{(val * 100).toFixed(1)}%</span>
       }
     },
     {
@@ -81,15 +76,20 @@ export function TablaPacientes() {
       header: "Nivel",
       cell: ({ row }: any) => {
         const risk = row.getValue("nivel_riesgo") as string
-        return <Badge className={`${colorBadge(risk)} text-white`}>{risk}</Badge>
+        return <Badge className={`${colorBadge(risk)} text-xs font-bold`}>{risk}</Badge>
       }
     },
-    { accessorKey: "accion_sugerida", header: "Acción Sugerida" },
+    {
+      accessorKey: "accion_sugerida",
+      header: "Acción sugerida",
+      cell: ({ row }: any) => (
+        <span className="text-muted-foreground text-xs">{row.getValue("accion_sugerida")}</span>
+      )
+    },
   ]
 
   const table = useReactTable({
-    data,
-    columns,
+    data, columns,
     state: { sorting, columnFilters, globalFilter },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -103,29 +103,32 @@ export function TablaPacientes() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-2">
-        <div className="relative w-full md:w-96">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-            <Input
-                placeholder="Buscar paciente o sucursal..."
-                value={globalFilter ?? ""}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="pl-9 bg-slate-50 border-slate-200 focus:ring-[#1D9E75]"
-            />
+      <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar paciente o sucursal..."
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="pl-9 bg-secondary border-border text-sm"
+          />
         </div>
-        <Button onClick={exportarCSV} className="bg-[#1D9E75] hover:bg-[#15805e] text-white flex gap-2 w-full md:w-auto font-bold shadow-sm">
-            <Download className="h-4 w-4" />
-            Exportar reporte CSV
+        <Button
+          onClick={exportarCSV}
+          className="bg-[#1D9E75] hover:bg-[#15805e] text-white flex gap-2 w-full md:w-auto text-xs font-bold h-9"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Exportar CSV
         </Button>
       </div>
 
-      <div className="rounded-xl border bg-white shadow-sm overflow-hidden overflow-x-auto">
+      <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id} className="bg-slate-50/80 border-b">
+              <tr key={headerGroup.id} className="bg-secondary border-b border-border">
                 {headerGroup.headers.map(header => (
-                  <th key={header.id} className="h-12 px-4 text-left align-middle font-bold text-slate-600 uppercase text-[10px] tracking-wider">
+                  <th key={header.id} className="h-10 px-4 text-left align-middle font-bold text-muted-foreground uppercase text-[10px] tracking-widest">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
                 ))}
@@ -134,10 +137,10 @@ export function TablaPacientes() {
           </thead>
           <tbody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="border-b transition-colors hover:bg-slate-50/50">
+              table.getRowModel().rows.map((row, i) => (
+                <tr key={row.id} className="border-b border-border transition-colors hover:bg-secondary/60" style={{ animationDelay: `${i * 20}ms` }}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="p-4 align-middle text-slate-700">
+                    <td key={cell.id} className="px-4 py-3 align-middle text-foreground">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -145,21 +148,29 @@ export function TablaPacientes() {
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="h-48 text-center">
-                  <p className="text-slate-400 font-medium italic">Sincronizando con el servidor...</p>
+                <td colSpan={columns.length} className="h-40 text-center text-muted-foreground text-sm">
+                  Sincronizando con el servidor...
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between pt-2">
-        <p className="text-sm font-medium text-slate-500 italic">
-          Mostrando {table.getRowModel().rows.length} de {data.length} pacientes filtrados
+
+      <div className="flex items-center justify-between pt-1">
+        <p className="text-xs text-muted-foreground">
+          {table.getRowModel().rows.length} de {data.length} pacientes
         </p>
-        <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="font-semibold">Anterior</Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="font-semibold">Siguiente</Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-8 w-8 p-0">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xs text-muted-foreground px-2">
+            Pág. {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-8 w-8 p-0">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
