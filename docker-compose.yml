@@ -1,0 +1,35 @@
+services:
+  api:
+    build: ./api
+    ports: 
+      - "8008:8008"
+    mem_limit: 512m
+    restart: unless-stopped
+    volumes: 
+      - ./api/modelo_vetsur.pkl:/app/modelo_vetsur.pkl
+      - ./api/columnas_vetsur.json:/app/columnas_vetsur.json
+      - ./api/data:/app/data
+    env_file: .env
+
+  frontend:
+    build: ./frontend  
+    ports: 
+      - "3000:3000"
+    mem_limit: 512m
+    restart: unless-stopped
+    depends_on: 
+      - api
+    env_file: .env
+
+  nginx:
+    image: nginx:alpine
+    ports: 
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on: 
+      - api
+      - frontend
+    restart: unless-stopped

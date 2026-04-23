@@ -1,0 +1,30 @@
+# Ambiente Local
+.env
+.env*.local
+.venv/
+__pycache__/
+*.pyc
+
+# Frontend
+**/node_modules/
+**/.next/
+**/out/
+**/.vercel
+**/coverage/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.pnp*
+.pnp.js
+**.tsbuildinfo
+next-env.d.ts
+
+# Documentación Privada
+INSTRUCCIONES.MD
+INFORME_BUSINESS_INTELIGENCE_VETSUR.PDF
+INFORME_BUSINESS_INTELIGENCE_VETSUR.pdf
+README.md
+
+# OS junk
+.DS_Store
+Thumbs.db
