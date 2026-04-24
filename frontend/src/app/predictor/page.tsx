@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from "react"
 import Link from "next/link"
-import { Activity, ChevronLeft, Stethoscope, BarChart3, Info, Sparkles } from "lucide-react"
+import { Activity, ChevronLeft, Stethoscope, BarChart3, Info, Sparkles, Zap, Brain } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { GaugePrediccion } from "@/components/gauge-prediccion"
@@ -84,10 +84,19 @@ export default function PredictorPage() {
             </div>
             <span className="font-black text-xl tracking-tighter">VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span></span>
           </Link>
-          <Link href="/" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-[#1D9E75] transition-colors">
-            <ChevronLeft className="h-4 w-4" />
-            Volver
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link
+              href="/arquitectura"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
+            >
+              <Zap className="h-4 w-4" />
+              Arquitectura
+            </Link>
+            <Link href="/" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-[#1D9E75] transition-colors border-l border-white/10 pl-6">
+              <ChevronLeft className="h-4 w-4" />
+              Volver
+            </Link>
+          </div>
         </div>
       </header>
 

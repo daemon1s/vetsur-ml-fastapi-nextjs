@@ -7,7 +7,7 @@ import { GraficoSucursales } from "@/components/grafico-sucursales"
 import { GraficoEspecies } from "@/components/grafico-especies"
 import { TablaPacientes } from "@/components/tabla-pacientes"
 import { Badge } from "@/components/ui/badge"
-import { Activity, Brain, ChevronRight } from "lucide-react"
+import { Activity, Brain, ChevronRight, Zap } from "lucide-react"
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null)
@@ -45,14 +45,24 @@ export default function Dashboard() {
             </span>
           </Link>
 
-          <Link
-            href="/predictor"
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
-          >
-            <Brain className="h-4 w-4" />
-            Predictor IA
-            <ChevronRight className="h-3 w-3 opacity-30" />
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link
+              href="/arquitectura"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
+            >
+              <Zap className="h-4 w-4" />
+              Arquitectura
+            </Link>
+
+            <Link
+              href="/predictor"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
+            >
+              <Brain className="h-4 w-4" />
+              Predictor IA
+              <ChevronRight className="h-3 w-3 opacity-30" />
+            </Link>
+          </div>
         </div>
       </header>
 
