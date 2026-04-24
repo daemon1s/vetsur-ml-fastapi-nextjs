@@ -1,0 +1,4 @@
+*.ipynb linguist-documentation=true
+*.csv linguist-vendored=true
+*.pkl linguist-vendored=true
+api/data/* linguist-vendored=true
