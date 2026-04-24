@@ -73,9 +73,7 @@ export default function PredictorPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg text-white relative overflow-x-hidden">
 
-      {/* Background Glows Fijos */}
-      <div className="fixed -top-[10%] -left-[10%] w-[40%] h-[40%] bg-[#1D9E75]/15 blur-[120px] rounded-full pointer-events-none z-0" />
-      <div className="fixed -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none z-0" />
+
 
       {/* Header Unificado */}
       <header className="sticky top-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-4 lg:px-8">
@@ -130,25 +128,23 @@ export default function PredictorPage() {
                     <input
                       type="range"
                       min="1"
-                      max="730"
+                      max="540"
                       value={formData.dias_desde_ultima_visita}
                       onChange={(e) => updateForm("dias_desde_ultima_visita", Number(e.target.value))}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                     />
                     <div
                       className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#1D9E75] to-[#25C08F] rounded-full shadow-[0_0_15px_rgba(29,158,117,0.4)]"
-                      style={{ width: `${(formData.dias_desde_ultima_visita / 730) * 100}%` }}
+                      style={{ width: `${(formData.dias_desde_ultima_visita / 540) * 100}%` }}
                     />
                     <div
                       className="absolute top-1/2 -translate-y-1/2 size-5 bg-white border-4 border-[#1D9E75] rounded-full shadow-xl pointer-events-none"
-                      style={{ left: `calc(${(formData.dias_desde_ultima_visita / 730) * 100}% - 10px)` }}
+                      style={{ left: `calc(${(formData.dias_desde_ultima_visita / 540) * 100}% - 10px)` }}
                     />
                   </div>
-                  {formData.dias_desde_ultima_visita > 540 && (
-                    <p className="text-[9px] text-amber-500 font-bold uppercase tracking-widest animate-pulse">
-                      ⚠️ Valor fuera del rango de entrenamiento (máx 540d)
-                    </p>
-                  )}
+                  <p className="text-[11px] text-amber-500/80 font-medium italic mt-2">
+                    * El modelo de IA ha sido entrenado con un rango máximo de 540 días para asegurar mayor precisión técnica.
+                  </p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
@@ -182,8 +178,8 @@ export default function PredictorPage() {
                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest">¿Deseas ingresar montos exactos?</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="sr-only peer"
                         checked={useCustomAmounts}
                         onChange={(e) => setUseCustomAmounts(e.target.checked)}
@@ -196,20 +192,20 @@ export default function PredictorPage() {
                     <div className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="space-y-2">
                         <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Monto Cobrado (CLP)</label>
-                        <input 
-                          type="number" 
-                          value={formData.monto_cobrado} 
-                          onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))} 
-                          className={inputBase} 
+                        <input
+                          type="number"
+                          value={formData.monto_cobrado}
+                          onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))}
+                          className={inputBase}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Costo Meds (CLP)</label>
-                        <input 
-                          type="number" 
-                          value={formData.costo_medicamento} 
-                          onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))} 
-                          className={inputBase} 
+                        <input
+                          type="number"
+                          value={formData.costo_medicamento}
+                          onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))}
+                          className={inputBase}
                         />
                       </div>
                     </div>
@@ -331,9 +327,8 @@ export default function PredictorPage() {
                     <BarChart3 className="h-16 w-16 text-[#1D9E75] opacity-50" />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Motor de Inferencia</h3>
-                <p className="text-sm font-medium text-muted-foreground leading-relaxed max-w-[280px]">
-                  El sistema está listo para procesar el perfil clínico del paciente.
+                <p className="text-muted-foreground font-medium">
+                  Ingresa los datos de la consulta para comenzar el análisis.
                 </p>
               </div>
             )}

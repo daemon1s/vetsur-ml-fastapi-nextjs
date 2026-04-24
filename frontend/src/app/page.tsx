@@ -31,9 +31,7 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg pt-16 relative overflow-x-hidden">
 
-      {/* Background Glows Fijos */}
-      <div className="fixed -top-[10%] -left-[10%] w-[40%] h-[40%] bg-[#1D9E75]/15 blur-[120px] rounded-full pointer-events-none z-0" />
-      <div className="fixed -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none z-0" />
+
 
       {/* Navbar Superior Fijo */}
       <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-6 lg:px-10">
@@ -52,7 +50,7 @@ export default function Dashboard() {
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
           >
             <Brain className="h-4 w-4" />
-            Motor Predictor
+            Predictor IA
             <ChevronRight className="h-3 w-3 opacity-30" />
           </Link>
         </div>
@@ -64,7 +62,7 @@ export default function Dashboard() {
         <div className="grid gap-8 md:grid-cols-2 [isolation:isolate] relative z-10">
           <TarjetaKpiML
             metricaPrincipal={{
-              label: "Pacientes en Riesgo",
+              label: "Pacientes en riesgo",
               valor: String(stats?.kpis?.riesgo_alto ?? "—"),
               subtexto: "probabilidad > 70%",
               highlight: true
