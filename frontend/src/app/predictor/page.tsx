@@ -10,7 +10,7 @@ import type { DatosPaciente, RespuestaPrediccion } from "@/types/vetsur"
 import { Badge } from "@/components/ui/badge"
 
 export default function PredictorPage() {
-  const [formData, setFormData] = useState<DatosPaciente>({
+  const initialForm: DatosPaciente = {
     dias_desde_ultima_visita: 30,
     visitas_historicas: 3,
     monto_cobrado: 25000,
@@ -22,7 +22,10 @@ export default function PredictorPage() {
     sucursal: "Providencia",
     tipo_atencion: "Consulta general",
     diagnostico: "Control rutina"
-  })
+  }
+
+  const [formData, setFormData] = useState<DatosPaciente>(initialForm)
+  const [useCustomAmounts, setUseCustomAmounts] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [resultado, setResultado] = useState<RespuestaPrediccion | null>(null)
@@ -34,7 +37,11 @@ export default function PredictorPage() {
     try {
       const res = await apiObj.predecirPaciente({
         ...formData,
-        visitas_historicas: Math.max(1, formData.visitas_historicas)
+        monto_cobrado: useCustomAmounts ? Number(formData.monto_cobrado) : 0,
+        costo_medicamento: useCustomAmounts ? Number(formData.costo_medicamento) : 0,
+        visitas_historicas: Math.max(1, Number(formData.visitas_historicas)),
+        edad_mascota_anios: Number(formData.edad_mascota_anios),
+        dias_desde_ultima_visita: Number(formData.dias_desde_ultima_visita)
       })
       setResultado(res)
     } catch (e: any) {
@@ -42,6 +49,12 @@ export default function PredictorPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleReset = () => {
+    setFormData(initialForm)
+    setResultado(null)
+    setError(null)
   }
 
   const updateForm = (key: keyof DatosPaciente, value: any) => {
@@ -87,7 +100,7 @@ export default function PredictorPage() {
           <div className="lg:col-span-7 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
               <h1 className="text-4xl font-bold tracking-tight mb-2 flex items-center gap-3">
-                Predicción de Riesgo
+                Predicción de riesgo
                 <Sparkles className="h-6 w-6 text-[#1D9E75]" />
               </h1>
               <p className="text-muted-foreground font-medium">Motor de inteligencia artificial para la retención de pacientes.</p>
@@ -138,7 +151,7 @@ export default function PredictorPage() {
                   )}
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
                   <div className="space-y-2">
                     <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Especie</label>
                     <div className="relative">
@@ -153,24 +166,61 @@ export default function PredictorPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Edad Mascota (Años)</label>
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Edad (Años)</label>
                     <input type="number" step="0.5" value={formData.edad_mascota_anios} onChange={(e) => updateForm("edad_mascota_anios", Number(e.target.value))} className={inputBase} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Visitas Totales</label>
+                    <input type="number" value={formData.visitas_historicas} onChange={(e) => updateForm("visitas_historicas", Number(e.target.value))} className={inputBase} />
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Visitas</label>
-                    <input type="number" value={formData.visitas_historicas} onChange={(e) => updateForm("visitas_historicas", Number(e.target.value))} className={inputBase} />
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h3 className="text-sm font-semibold">Consumo de la última consulta</h3>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">¿Deseas ingresar montos exactos?</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={useCustomAmounts}
+                        onChange={(e) => setUseCustomAmounts(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1D9E75]"></div>
+                    </label>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Cobro ($)</label>
-                    <input type="number" value={formData.monto_cobrado} onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))} className={inputBase} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Meds ($)</label>
-                    <input type="number" value={formData.costo_medicamento} onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))} className={inputBase} />
-                  </div>
+
+                  {useCustomAmounts ? (
+                    <div className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Monto Cobrado (CLP)</label>
+                        <input 
+                          type="number" 
+                          value={formData.monto_cobrado} 
+                          onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))} 
+                          className={inputBase} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Costo Meds (CLP)</label>
+                        <input 
+                          type="number" 
+                          value={formData.costo_medicamento} 
+                          onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))} 
+                          className={inputBase} 
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-[#1D9E75]/5 border border-[#1D9E75]/20 flex items-center gap-3">
+                      <div className="h-2 w-2 rounded-full bg-[#1D9E75] animate-pulse" />
+                      <p className="text-[10px] font-medium text-[#1D9E75] uppercase tracking-widest">
+                        Utilizando promedios inteligentes (Mediana histórica)
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -186,13 +236,24 @@ export default function PredictorPage() {
                     <div className="space-y-2">
                       <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Atención</label>
                       <select value={formData.tipo_atencion} onChange={(e) => updateForm("tipo_atencion", e.target.value)} className={selectBase}>
-                        {["Consulta especialidad", "Consulta general", "Hospitalización", "Venta producto"].map(s => <option key={s} value={s}>{s}</option>)}
+                        {["Cirugía", "Consulta especialidad", "Consulta general", "Hospitalización", "Venta producto"].map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Diagnóstico</label>
                       <select value={formData.diagnostico} onChange={(e) => updateForm("diagnostico", e.target.value)} className={selectBase}>
-                        {["Control rutina", "Artritis C", "Dermatitis", "Diabetes", "Fractura", "Gastroenteritis", "Otitis", "Parvovirus", "Tumor"].map(s => <option key={s} value={s}>{s}</option>)}
+                        {[
+                          "Control rutina", "Control rutina C",
+                          "Artritis", "Artritis C",
+                          "Dermatitis", "Dermatitis C",
+                          "Diabetes", "Diabetes C",
+                          "Esterilización", "Esterilización C",
+                          "Fractura", "Fractura C",
+                          "Gastroenteritis", "Gastroenteritis C",
+                          "Otitis", "Otitis C",
+                          "Parvovirus", "Parvovirus C",
+                          "Tumor", "Tumor C"
+                        ].map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </div>
@@ -255,7 +316,7 @@ export default function PredictorPage() {
                         </p>
                       </div>
 
-                      <Button variant="ghost" onClick={() => setResultado(null)} className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest">
+                      <Button variant="ghost" onClick={handleReset} className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest">
                         Reestablecer Parámetros
                       </Button>
                     </div>

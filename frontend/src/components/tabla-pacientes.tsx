@@ -22,6 +22,27 @@ export function TablaPacientes() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState("")
 
+  // Normalizador para búsqueda inteligente (ignora tildes y eñes)
+  const normalize = (s: string) =>
+    s.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/ñ/g, "n")
+
+  const displaySucursal = (s: string) => {
+    const map: Record<string, string> = {
+      "la florida": "La Florida",
+      "las condes": "Las Condes",
+      "maipu": "Maipú",
+      "nunoa": "Ñuñoa",
+      "penalolen": "Peñalolén",
+      "providencia": "Providencia",
+      "pudahuel": "Pudahuel",
+      "san miguel": "San Miguel"
+    }
+    return map[s.toLowerCase()] || s
+  }
+
   useEffect(() => {
     apiObj.obtenerPacientesEnRiesgo()
       .then(res => setData(res))
@@ -30,9 +51,9 @@ export function TablaPacientes() {
 
   const colorBadge = (riesgo: string) => {
     switch (riesgo) {
-      case "Alto":  return "bg-red-500/10 text-red-400 border border-red-500/20"
+      case "Alto": return "bg-red-500/10 text-red-400 border border-red-500/20"
       case "Medio": return "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-      default:      return "bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20"
+      default: return "bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20"
     }
   }
 
@@ -58,15 +79,19 @@ export function TablaPacientes() {
   }
 
   const columns = [
-    { 
-      accessorKey: "paciente_id", 
+    {
+      accessorKey: "paciente_id",
       header: "Paciente",
       cell: ({ row }: any) => <span className="font-bold text-white/80 tracking-tight">#{row.getValue("paciente_id")}</span>
     },
     { accessorKey: "especie", header: "Especie" },
-    { accessorKey: "sucursal", header: "Sucursal" },
-    { 
-      accessorKey: "dias_desde_ultima_visita", 
+    {
+      accessorKey: "sucursal",
+      header: "Sucursal",
+      cell: ({ row }: any) => displaySucursal(row.getValue("sucursal"))
+    },
+    {
+      accessorKey: "dias_desde_ultima_visita",
       header: "Días sin Visita",
       cell: ({ row }: any) => <span className="font-bold text-white/90 tracking-tight">{row.getValue("dias_desde_ultima_visita")}d</span>
     },
@@ -78,9 +103,9 @@ export function TablaPacientes() {
         return (
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden w-12 hidden sm:block">
-              <div 
-                className="h-full bg-[#1D9E75]" 
-                style={{ width: `${val * 100}%`, backgroundColor: val > 0.7 ? '#E24B4A' : '#1D9E75' }} 
+              <div
+                className="h-full bg-[#1D9E75]"
+                style={{ width: `${val * 100}%`, backgroundColor: val > 0.7 ? '#E24B4A' : '#1D9E75' }}
               />
             </div>
             <span className="font-bold text-white tabular-nums text-sm">{(val * 100).toFixed(1)}%</span>
@@ -97,12 +122,33 @@ export function TablaPacientes() {
       }
     },
     {
-      accessorKey: "accion_sugerida",
-      header: "Acción Sugerida",
+      id: "acciones",
+      header: "Acción CRM",
       cell: ({ row }: any) => (
-        <span className="text-white/70 text-[11px] font-semibold leading-tight max-w-[220px] block line-clamp-1 group-hover:line-clamp-none transition-all duration-300">
-          {row.getValue("accion_sugerida")}
-        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 rounded-lg bg-[#1D9E75]/10 hover:bg-[#1D9E75]/20 text-[#1D9E75] border border-[#1D9E75]/20"
+            title="Contactar por WhatsApp"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
+              <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
+            </svg>
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10"
+            title="Llamar al cliente"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
+            </svg>
+          </Button>
+        </div>
       )
     },
   ]
@@ -117,6 +163,11 @@ export function TablaPacientes() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    globalFilterFn: (row, columnId, filterValue) => {
+      const value = row.getValue(columnId)
+      if (!value) return false
+      return normalize(String(value)).includes(normalize(filterValue))
+    },
     initialState: { pagination: { pageSize: 12 } }
   })
 
@@ -135,10 +186,10 @@ export function TablaPacientes() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Button
             onClick={exportarCSV}
-            className="flex-1 md:flex-none h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-white flex gap-2 font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all"
+            className="flex-1 md:flex-none h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-white flex gap-2 font-semibold text-sm rounded-2xl transition-all"
           >
             <Download className="h-4 w-4 text-[#1D9E75]" />
-            Data Export
+            Exportar excel
           </Button>
         </div>
       </div>
@@ -182,15 +233,15 @@ export function TablaPacientes() {
       </div>
 
       <div className="flex items-center justify-between px-2">
-        <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
-          Showing {table.getRowModel().rows.length} records
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+          Mostrando {table.getRowModel().rows.length} registros
         </p>
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+            Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
           </span>
           <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all">
             <ChevronRight className="h-5 w-5" />

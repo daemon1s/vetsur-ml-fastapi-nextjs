@@ -26,6 +26,8 @@ class ModeloVetSur:
         self.ruta_columnas = ruta_columnas
         self.modelo = None
         self.columnas_esperadas = []
+        self.MEDIANA_MONTO = 42100.0
+        self.MEDIANA_COSTO = 9500.0
         self.resultados_cache = None
         self.inicializar()
         self._inicializado = True
@@ -47,15 +49,18 @@ class ModeloVetSur:
         return t.lower().strip().replace(" ", "_").replace(".", "").replace("-", "_")
 
     def _evaluar_riesgo(self, probabilidad_abandono: float) -> Tuple[str, str]:
-        if probabilidad_abandono >= 0.70:
+        if probabilidad_abandono >= 0.60:
             return "Alto", "Contactar inmediatamente al cliente por WhatsApp para ofrecer chequeo preventivo."
-        elif probabilidad_abandono >= 0.40:
-            return "Medio", "Enviar email con campaña de recordatorio o descuento en peluquería/vacunas."
+        elif probabilidad_abandono >= 0.20:
+            return "Medio", "Sugerir campaña de recordatorio vía Email / Descuento peluquería."
         else:
             return "Bajo", "Programar recordatorio estándar en sistema, paciente leal."
 
     def predecir_uno(self, datos: DatosPaciente) -> Dict[str, Any]:
         df_input = pd.DataFrame([0] * len(self.columnas_esperadas), index=self.columnas_esperadas).T
+        
+        monto = datos.monto_cobrado if datos.monto_cobrado > 0 else self.MEDIANA_MONTO
+        costo = datos.costo_medicamento if datos.costo_medicamento > 0 else self.MEDIANA_COSTO
         
         mapping = {
             f"especie_{self._limpiar_texto(datos.especie)}": 1,
@@ -64,8 +69,8 @@ class ModeloVetSur:
             f"diagnostico_texto_{self._limpiar_texto(datos.diagnostico)}": 1,
             "dias_desde_ultima_visita": datos.dias_desde_ultima_visita,
             "visitas_historicas": datos.visitas_historicas,
-            "monto_cobrado": datos.monto_cobrado,
-            "costo_medicamento": datos.costo_medicamento,
+            "monto_cobrado": monto,
+            "costo_medicamento": costo,
             "tiene_vacunas_al_dia": 1 if datos.tiene_vacunas_al_dia else 0,
             "edad_mascota_anios": datos.edad_mascota_anios,
             "raza_registrada": 1 if datos.raza_registrada else 0
@@ -143,6 +148,9 @@ class ModeloVetSur:
                 "nivel_riesgo": riesgo,
                 "accion_sugerida": accion
             })
+        
+        # Ordenamos por probabilidad de abandono descendente (Más riesgo arriba)
+        res.sort(key=lambda x: x["probabilidad_abandono"], reverse=True)
         
         df_res = pd.DataFrame(res)
         if limit is None: self.resultados_cache = df_res

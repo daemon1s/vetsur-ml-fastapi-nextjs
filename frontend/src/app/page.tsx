@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg pt-16 relative overflow-x-hidden">
-      
+
       {/* Background Glows Fijos */}
       <div className="fixed -top-[10%] -left-[10%] w-[40%] h-[40%] bg-[#1D9E75]/15 blur-[120px] rounded-full pointer-events-none z-0" />
       <div className="fixed -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -109,8 +109,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#1D9E75] to-transparent shadow-[0_0_15px_rgba(29,158,117,0.3)]" />
               <div className="space-y-0.5">
-                <h2 className="text-xl font-bold text-white tracking-tight">Panel de Acción CRM</h2>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/20">Protocolos de retención activados</p>
+                <h2 className="text-xl font-bold text-white tracking-tight">Panel de acción CRM</h2>
               </div>
             </div>
           </div>

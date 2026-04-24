@@ -51,7 +51,7 @@ async def evaluar_pacientes_pendientes():
             return []
             
         df = pd.read_csv(ruta_csv, encoding='latin1')
-        df_riesgo = predictor.predecir_lote(df, limit=100) # Maximo 100 para la tabla
+        df_riesgo = predictor.predecir_lote(df, limit=1000) # Visibilidad aumentada para mostrar el universo de datos
         
         lista_riesgo = []
         for _, row in df_riesgo.iterrows():
