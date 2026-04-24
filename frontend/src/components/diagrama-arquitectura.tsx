@@ -20,7 +20,7 @@ import {
   Zap
 } from "lucide-react"
 
-// --- Configuración de Tiers ---
+
 const TIERS = {
   CLIENT: { label: "Capa de Cliente", color: "#3B82F6", x: 120 },
   GATEWAY: { label: "Pasarela / Ingress", color: "#06B6D4", x: 420 },
@@ -28,7 +28,7 @@ const TIERS = {
   DATA: { label: "Capa de Datos", color: "#6366F1", x: 1080 }
 }
 
-// --- Componente de Portal para Tooltips ---
+
 const TooltipPortal = ({ children }: { children: React.ReactNode }) => {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -36,7 +36,7 @@ const TooltipPortal = ({ children }: { children: React.ReactNode }) => {
   return createPortal(children, document.body)
 }
 
-// --- Componente de Tooltip Premium ---
+
 const Tooltip = ({ node, color, style }: any) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9, y: 10 }}
@@ -78,7 +78,7 @@ const Tooltip = ({ node, color, style }: any) => (
   </motion.div>
 )
 
-// --- Componente de Nodo ---
+
 const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, logo, description, techStack, onHover }: any) => {
   return (
     <motion.foreignObject
@@ -93,22 +93,14 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
         onMouseEnter={() => onHover({ x, y, icon: Icon, logo, title, subtitle, color, port, isSingleton, description, techStack })}
         onMouseLeave={() => onHover(null)}
       >
-        {/* Dynamic Glow */}
-        <div
-          className="absolute inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-30 transition-all duration-700 scale-90 group-hover:scale-110"
-          style={{ backgroundColor: color }}
-        />
 
-        {/* Card Body */}
         <div className="relative flex flex-col items-center w-full p-5 rounded-3xl bg-[#13141C]/60 backdrop-blur-xl border border-white/5 group-hover:border-white/20 transition-all duration-500 group-hover:-translate-y-2 shadow-2xl">
 
-          {/* Main Icon Container */}
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border border-white/5 bg-white/5 relative z-10 transition-transform duration-500 group-hover:scale-110"
           >
             {logo ? logo : <Icon className="w-7 h-7" style={{ color }} />}
 
-            {/* Singleton Badge Integrated */}
             {isSingleton && (
               <div className="absolute -top-2 -right-2 bg-amber-500 p-1 rounded-full shadow-lg border-2 border-[#13141C]">
                 <Zap className="w-2.5 h-2.5 text-black" />
@@ -123,12 +115,9 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
             </p>
           </div>
 
-          {/* Port Badge Integrated */}
           {port && (
-            <div className="mt-auto w-full flex justify-center pb-1">
-              <div className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 opacity-60">
-                <span className="text-[8px] font-mono font-medium text-white/80 uppercase tracking-wider">:{port}</span>
-              </div>
+            <div className="mt-auto w-full flex justify-center pb-2">
+              <span className="text-[10px] font-mono font-bold text-white tracking-widest">:{port}</span>
             </div>
           )}
         </div>
@@ -137,13 +126,12 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
   )
 }
 
-// --- Componente de Conexión Req/Res ---
+
 const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, delay = 0 }: any) => {
   const id = React.useId().replace(/:/g, "")
   const dx = end.x - start.x
   const dy = end.y - start.y
 
-  // Curva Bezier Cúbica para un flujo más fluido
   const path = `M ${start.x} ${start.y} C ${start.x + dx / 2} ${start.y}, ${start.x + dx / 2} ${end.y}, ${end.x} ${end.y}`
 
   return (
@@ -154,7 +142,6 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, 
         </marker>
       </defs>
 
-      {/* Path Base */}
       <path
         id={id}
         d={path}
@@ -166,7 +153,6 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, 
         markerEnd={`url(#arrow-${id})`}
       />
 
-      {/* Resplandor del Path al Hover */}
       <path
         d={path}
         fill="none"
@@ -176,21 +162,18 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, 
         className="group-hover:stroke-opacity-10 transition-all duration-300 cursor-pointer"
       />
 
-      {/* Partícula de Request (Sólida) */}
       <circle r="3" fill={color} className="filter drop-shadow-[0_0_8px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
         <animateMotion dur={`${duration}s`} repeatCount="indefinite" begin={`${delay}s`} calcMode="spline" keySplines="0.4 0 0.2 1">
           <mpath href={`#${id}`} />
         </animateMotion>
       </circle>
 
-      {/* Partícula de Response (Atenuada) */}
       <circle r="2" fill={color} fillOpacity="0.3">
         <animateMotion dur={`${duration}s`} repeatCount="indefinite" begin={`${delay + duration * 0.7}s`} keyPoints="1;0" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
           <mpath href={`#${id}`} />
         </animateMotion>
       </circle>
 
-      {/* Label de Flujo */}
       {label && (
         <foreignObject x={(start.x + end.x) / 2 - 60} y={(start.y + end.y) / 2 - 12} width="120" height="24" className="overflow-visible pointer-events-none">
           <div className="flex items-center justify-center w-full h-full opacity-90 group-hover:opacity-100 transition-opacity">
@@ -231,13 +214,11 @@ export function DiagramaArquitectura() {
   return (
     <div className="w-full h-full min-h-[65vh] bg-[#0B0C10] rounded-[48px] p-8 md:p-12 overflow-hidden relative border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center">
 
-      {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[150px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[150px] rounded-full" />
       </div>
 
-      {/* Diagram Header - Lowered z-index to not cover tooltips */}
       <div className="absolute top-10 left-10 right-10 flex justify-between items-end z-0">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -256,7 +237,6 @@ export function DiagramaArquitectura() {
       <div className="relative z-20 w-full max-w-7xl aspect-[1.8/1] mt-10 scale-90 md:scale-100 transition-transform">
         <svg ref={svgRef} viewBox="0 0 1250 750" className="w-full h-full overflow-visible">
 
-          {/* Tier Labels (Vertical) */}
           <g className="opacity-50 pointer-events-none font-black text-[12px] uppercase tracking-[0.5em]">
             <text x={TIERS.CLIENT.x} y="730" textAnchor="middle" fill={TIERS.CLIENT.color}>Cliente</text>
             <text x={TIERS.GATEWAY.x} y="730" textAnchor="middle" fill={TIERS.GATEWAY.color}>Pasarela</text>
@@ -264,18 +244,14 @@ export function DiagramaArquitectura() {
             <text x={TIERS.DATA.x} y="730" textAnchor="middle" fill={TIERS.DATA.color}>Datos</text>
           </g>
 
-          {/* Connections */}
           <Connection start={nodes.user} end={nodes.nginx} label="TLS 1.3" color={TIERS.CLIENT.color} duration={5} />
           <Connection start={nodes.nginx} end={nodes.front} label="Proxy Pass" color={TIERS.GATEWAY.color} duration={4} delay={0.2} />
 
-          {/* Flujo lógico: Frontend -> Backend */}
           <Connection start={nodes.front} end={nodes.back} label="Consumo API" color={TIERS.APP.color} duration={3} delay={1.5} isDashed={true} />
 
-          {/* Explicit Data Flow Labels */}
           <Connection start={nodes.back} end={nodes.db} label="Lectura CSV" color={TIERS.APP.color} duration={3} delay={0.1} />
           <Connection start={nodes.back} end={nodes.model} label="Random Forest" color={TIERS.APP.color} duration={3} delay={1.1} />
 
-          {/* Nodes - Client */}
           <Node
             {...nodes.user} color={TIERS.CLIENT.color}
             icon={Globe} title="Navegador web" subtitle="Interfaz de usuario"
@@ -284,7 +260,6 @@ export function DiagramaArquitectura() {
             onHover={setHoveredNode}
           />
 
-          {/* Nodes - Gateway */}
           <Node
             {...nodes.nginx} color={TIERS.GATEWAY.color} port="80/443"
             icon={Server} title="Nginx" subtitle="Proxy Inverso"
@@ -299,7 +274,6 @@ export function DiagramaArquitectura() {
             onHover={setHoveredNode}
           />
 
-          {/* Nodes - App */}
           <Node
             {...nodes.front} color={TIERS.CLIENT.color} port="3000"
             icon={LayoutTemplate} title="Next.js" subtitle="Frontend"
@@ -328,7 +302,6 @@ export function DiagramaArquitectura() {
             onHover={setHoveredNode}
           />
 
-          {/* Nodes - Data */}
           <Node
             {...nodes.db} color={TIERS.DATA.color}
             icon={FileText} title="Datos de pacientes" subtitle="Registros CSV"
@@ -371,7 +344,6 @@ export function DiagramaArquitectura() {
         </AnimatePresence>
       </TooltipPortal>
 
-      {/* Bottom Status Bar - Cleaned up */}
       <div className="absolute bottom-10 left-10 right-10 flex justify-between items-center opacity-30">
         <div />
         <div />
