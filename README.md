@@ -21,7 +21,7 @@ A pesar de facturar aprox. $2.800 millones anuales, Vetsur operaba con sistemas 
 
 ## Vista del dashboard
 <p align="center">
-  <img src="docs/dashboard_mockup.png" alt="Dashboard de Vetsur" width="900">
+  <img src="docs/vetsur_dashboard_final.png" alt="Dashboard de Vetsur" width="900">
 </p>
 
 ## Proceso de ingeniería de datos (ETL)
@@ -31,7 +31,7 @@ No se optó por la eliminación de registros, sino por una reconstrucción lógi
 - **Refactorización de esquema:** evolución de un esquema estrella a un **esquema de galaxia**, separando los hechos de atención (`FACT_ATENCION`) de los movimientos de inventario (`FACT_INVENTARIO`).
 
 <p align="center">
-  <img src="docs/diagrama_galaxia.png?v=2" alt="Esquema de galaxia - vetsur" width="800">
+  <img src="docs/diagrama_vetsur_final.png" alt="Esquema de galaxia - vetsur" width="800">
   <br>
   <em>Diagrama de modelado: separación de hechos de atención e inventario compartiendo dimensiones clave.</em>
 </p>
@@ -44,7 +44,7 @@ Evaluamos regresión lineal y gradient boosting, pero el ganador indiscutible fu
 - **Exhaustividad (recall):** 91%. Priorizamos el recall para minimizar los falsos negativos, ya que para Vetsur es más costoso perder un cliente en peligro de fuga que realizar un contacto preventivo innecesario.
 
 <p align="center">
-  <img src="docs/predictor_mockup.png" alt="Predictor de riesgo" width="900">
+  <img src="docs/vetsur_predictor_final.png" alt="Predictor de riesgo" width="900">
 </p>
 
 ## Arquitectura del sistema (stack pro)
