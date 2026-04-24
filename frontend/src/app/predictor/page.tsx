@@ -1,15 +1,16 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { Activity, ChevronLeft, Stethoscope, BarChart3, Info, Sparkles, Zap, Brain } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { GaugePrediccion } from "@/components/gauge-prediccion"
 import { apiObj } from "@/lib/api"
 import type { DatosPaciente, RespuestaPrediccion } from "@/types/vetsur"
 import { Badge } from "@/components/ui/badge"
 
-export default function PredictorPage() {
+function PredictorPageContent() {
   const initialForm: DatosPaciente = {
     dias_desde_ultima_visita: 30,
     visitas_historicas: 3,
@@ -26,14 +27,20 @@ export default function PredictorPage() {
 
   const [formData, setFormData] = useState<DatosPaciente>(initialForm)
   const [useCustomAmounts, setUseCustomAmounts] = useState(false)
-
   const [loading, setLoading] = useState(false)
   const [resultado, setResultado] = useState<RespuestaPrediccion | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handlePredict = async () => {
+  const handlePredict = async (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log("!!! EJECUTANDO PREDICCIÓN !!!", formData);
     setLoading(true)
     setError(null)
+    
     try {
       const res = await apiObj.predecirPaciente({
         ...formData,
@@ -43,9 +50,11 @@ export default function PredictorPage() {
         edad_mascota_anios: Number(formData.edad_mascota_anios),
         dias_desde_ultima_visita: Number(formData.dias_desde_ultima_visita)
       })
+      console.log("!!! RESULTADO !!!", res);
       setResultado(res)
     } catch (e: any) {
-      setError(e.response?.data?.detail || e.message || "Error")
+      console.error("!!! ERROR !!!", e);
+      setError(e.response?.data?.detail || e.message || "Error de conexión")
     } finally {
       setLoading(false)
     }
@@ -66,16 +75,11 @@ export default function PredictorPage() {
       r === "Medio" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
         "bg-[#1D9E75]/20 text-[#1D9E75] border-[#1D9E75]/30"
 
-  // Estilos comunes para inputs
   const inputBase = "flex h-11 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/50 transition-all font-medium"
   const selectBase = "flex h-11 w-full rounded-xl border border-white/10 bg-[#13141C] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/50 appearance-none font-medium"
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg text-white relative overflow-x-hidden">
-
-
-
-      {/* Header Unificado */}
       <header className="sticky top-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-4 lg:px-8">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
@@ -85,10 +89,7 @@ export default function PredictorPage() {
             <span className="font-black text-xl tracking-tighter">VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span></span>
           </Link>
           <div className="flex items-center gap-8">
-            <Link
-              href="/arquitectura"
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all"
-            >
+            <Link href="/arquitectura" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-[#1D9E75] transition-all">
               <Zap className="h-4 w-4" />
               Arquitectura
             </Link>
@@ -102,8 +103,6 @@ export default function PredictorPage() {
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-10 z-10">
         <div className="grid lg:grid-cols-12 gap-10">
-
-          {/* Formulario */}
           <div className="lg:col-span-7 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
               <h1 className="text-4xl font-bold tracking-tight mb-2 flex items-center gap-3">
@@ -113,10 +112,11 @@ export default function PredictorPage() {
               <p className="text-muted-foreground font-medium">Motor de inteligencia artificial para la retención de pacientes.</p>
             </div>
 
-            <Card className="bg-[#13141C]/50 backdrop-blur-xl border-white/5 shadow-2xl rounded-3xl overflow-hidden">
-              <CardContent className="p-8 space-y-8">
-
-                {/* Días - Slider Manual */}
+            <Card className="bg-[#0A0B10] border-white/10 shadow-2xl rounded-3xl overflow-hidden relative group">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              
+              <CardContent className="p-8 space-y-8 relative z-10">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -159,16 +159,9 @@ export default function PredictorPage() {
                 <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
                   <div className="space-y-2">
                     <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Especie</label>
-                    <div className="relative">
-                      <select
-                        value={formData.especie}
-                        onChange={(e) => updateForm("especie", e.target.value)}
-                        className={selectBase}
-                      >
-                        {["Perro", "Gato", "Exótico", "Ave"].map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"><ChevronLeft className="rotate-270 h-4 w-4" /></div>
-                    </div>
+                    <select value={formData.especie} onChange={(e) => updateForm("especie", e.target.value)} className={selectBase}>
+                      {["Perro", "Gato", "Exótico", "Ave"].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Edad (Años)</label>
@@ -187,43 +180,20 @@ export default function PredictorPage() {
                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest">¿Deseas ingresar montos exactos?</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={useCustomAmounts}
-                        onChange={(e) => setUseCustomAmounts(e.target.checked)}
-                      />
+                      <input type="checkbox" className="sr-only peer" checked={useCustomAmounts} onChange={(e) => setUseCustomAmounts(e.target.checked)} />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1D9E75]"></div>
                     </label>
                   </div>
 
                   {useCustomAmounts ? (
                     <div className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Monto Cobrado (CLP)</label>
-                        <input
-                          type="number"
-                          value={formData.monto_cobrado}
-                          onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))}
-                          className={inputBase}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Costo Meds (CLP)</label>
-                        <input
-                          type="number"
-                          value={formData.costo_medicamento}
-                          onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))}
-                          className={inputBase}
-                        />
-                      </div>
+                      <input type="number" placeholder="Monto Cobrado" value={formData.monto_cobrado} onChange={(e) => updateForm("monto_cobrado", Number(e.target.value))} className={inputBase} />
+                      <input type="number" placeholder="Costo Meds" value={formData.costo_medicamento} onChange={(e) => updateForm("costo_medicamento", Number(e.target.value))} className={inputBase} />
                     </div>
                   ) : (
                     <div className="p-4 rounded-xl bg-[#1D9E75]/5 border border-[#1D9E75]/20 flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full bg-[#1D9E75] animate-pulse" />
-                      <p className="text-[10px] font-medium text-[#1D9E75] uppercase tracking-widest">
-                        Utilizando promedios inteligentes (Mediana histórica)
-                      </p>
+                      <p className="text-[10px] font-medium text-[#1D9E75] uppercase tracking-widest">Utilizando promedios inteligentes (Mediana histórica)</p>
                     </div>
                   )}
                 </div>
@@ -232,9 +202,7 @@ export default function PredictorPage() {
                   <div className="space-y-2">
                     <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Sucursal</label>
                     <select value={formData.sucursal} onChange={(e) => updateForm("sucursal", e.target.value)} className={selectBase}>
-                      {["La Florida", "Las Condes", "Maipú", "Ñuñoa", "Peñalolén", "Providencia", "Pudahuel", "San Miguel"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
+                      {["La Florida", "Las Condes", "Maipú", "Ñuñoa", "Peñalolén", "Providencia", "Pudahuel", "San Miguel"].map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -247,18 +215,7 @@ export default function PredictorPage() {
                     <div className="space-y-2">
                       <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Diagnóstico</label>
                       <select value={formData.diagnostico} onChange={(e) => updateForm("diagnostico", e.target.value)} className={selectBase}>
-                        {[
-                          "Control rutina", "Control rutina C",
-                          "Artritis", "Artritis C",
-                          "Dermatitis", "Dermatitis C",
-                          "Diabetes", "Diabetes C",
-                          "Esterilización", "Esterilización C",
-                          "Fractura", "Fractura C",
-                          "Gastroenteritis", "Gastroenteritis C",
-                          "Otitis", "Otitis C",
-                          "Parvovirus", "Parvovirus C",
-                          "Tumor", "Tumor C"
-                        ].map(s => <option key={s} value={s}>{s}</option>)}
+                        {["Control rutina", "Artritis", "Dermatitis", "Diabetes", "Esterilización", "Fractura", "Gastroenteritis", "Otitis", "Parvovirus", "Tumor"].map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </div>
@@ -266,43 +223,43 @@ export default function PredictorPage() {
 
                 <div className="grid sm:grid-cols-2 gap-6">
                   <label className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer group">
-                    <div className="space-y-1">
-                      <span className="text-sm font-semibold block">Vacunas al día</span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-semibold">Historial clínico</span>
-                    </div>
+                    <span className="text-sm font-semibold block">Vacunas al día</span>
                     <input type="checkbox" checked={formData.tiene_vacunas_al_dia} onChange={(e) => updateForm("tiene_vacunas_al_dia", e.target.checked)} className="size-6 rounded-lg accent-[#1D9E75] cursor-pointer" />
                   </label>
                   <label className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer group">
-                    <div className="space-y-1">
-                      <span className="text-sm font-semibold block">Mascota de raza</span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-semibold">Identificación</span>
-                    </div>
+                    <span className="text-sm font-semibold block">Mascota de raza</span>
                     <input type="checkbox" checked={formData.raza_registrada} onChange={(e) => updateForm("raza_registrada", e.target.checked)} className="size-6 rounded-lg accent-[#1D9E75] cursor-pointer" />
                   </label>
                 </div>
 
-                <Button
+                <button
                   onClick={handlePredict}
                   disabled={loading}
-                  className="w-full h-16 bg-gradient-to-r from-[#1D9E75] to-[#25C08F] hover:shadow-[0_0_30px_rgba(29,158,117,0.5)] text-white text-base font-semibold tracking-wide rounded-2xl transition-all active:scale-[0.98] shadow-lg"
+                  type="button"
+                  className="w-full h-16 bg-gradient-to-r from-[#1D9E75] to-[#25C08F] hover:shadow-[0_0_30px_rgba(29,158,117,0.5)] text-white text-base font-semibold tracking-wide rounded-2xl transition-all active:scale-[0.98] shadow-lg relative z-30 flex items-center justify-center gap-2"
                 >
-                  {loading ? "Procesando perfil..." : "Ejecutar predicción"}
-                </Button>
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Procesando...
+                    </div>
+                  ) : (
+                    "Ejecutar predicción"
+                  )}
+                </button>
                 {error && <p className="text-center text-xs text-destructive font-bold uppercase tracking-widest">⚠️ {error}</p>}
               </CardContent>
             </Card>
           </div>
 
-          {/* Resultado */}
           <div className="lg:col-span-5 sticky top-24">
             {resultado ? (
               <div className="animate-in fade-in zoom-in duration-500">
-                <Card className="bg-[#13141C]/80 backdrop-blur-2xl border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[40px] p-10 relative overflow-hidden border-t-white/20">
+                <Card className="bg-[#0A0B10] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[40px] p-10 relative overflow-hidden border-t-white/20 group">
                   <div className={`absolute top-0 left-0 w-full h-2 ${resultado.nivel_riesgo === 'Alto' ? 'bg-red-500' : 'bg-[#1D9E75]'}`} />
                   <div className="text-center space-y-8">
                     <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Análisis de retención</h2>
                     <GaugePrediccion probabilidad={resultado.probabilidad_retorno} riesgo={resultado.nivel_riesgo} />
-
                     <div className="space-y-6">
                       <div className="flex items-center justify-between bg-white/5 p-5 rounded-3xl border border-white/5">
                         <span className="text-[11px] font-semibold uppercase tracking-widest text-[#1D9E75]">Prob. abandono</span>
@@ -310,17 +267,13 @@ export default function PredictorPage() {
                           {resultado.nivel_riesgo}
                         </Badge>
                       </div>
-
                       <div className="text-left bg-[#1D9E75]/5 p-6 rounded-3xl border border-[#1D9E75]/20 space-y-3">
                         <div className="flex items-center gap-2">
                           <Info className="h-4 w-4 text-[#1D9E75]" />
                           <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1D9E75]">Estrategia sugerida</span>
                         </div>
-                        <p className="text-base text-white/90 font-medium leading-relaxed italic">
-                          "{resultado.accion_sugerida}"
-                        </p>
+                        <p className="text-base text-white/90 font-medium leading-relaxed italic">"{resultado.accion_sugerida}"</p>
                       </div>
-
                       <Button variant="ghost" onClick={handleReset} className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest">
                         Reestablecer Parámetros
                       </Button>
@@ -336,15 +289,15 @@ export default function PredictorPage() {
                     <BarChart3 className="h-16 w-16 text-[#1D9E75] opacity-50" />
                   </div>
                 </div>
-                <p className="text-muted-foreground font-medium">
-                  Ingresa los datos de la consulta para comenzar el análisis.
-                </p>
+                <p className="text-muted-foreground font-medium">Ingresa los datos de la consulta para comenzar el análisis.</p>
               </div>
             )}
           </div>
-
         </div>
       </main>
     </div>
   )
 }
+
+const PredictorPage = dynamic(() => Promise.resolve(PredictorPageContent), { ssr: false })
+export default PredictorPage

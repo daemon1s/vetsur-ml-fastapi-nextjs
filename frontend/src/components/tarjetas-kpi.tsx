@@ -17,12 +17,13 @@ interface KpiDualProps {
 export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono, color = "#1D9E75" }: KpiDualProps) {
   return (
     <div 
-      className="relative overflow-hidden bg-[#13141C]/40 backdrop-blur-2xl border border-white/5 p-8 rounded-[32px] shadow-2xl transition-all hover:border-[#1D9E75]/30 group animate-in-up"
+      className="relative overflow-hidden bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:border-white/20 group animate-in-up"
     >
-      <div 
-        className="absolute -right-16 -top-16 w-48 h-48 blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
-        style={{ backgroundColor: color }}
-      />
+      {/* Sheen reflectivo premium en hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      {/* Borde superior de luz sutil */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       
       <div className="relative z-10 space-y-8">
         <div className="flex justify-between items-center">

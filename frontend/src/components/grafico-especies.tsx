@@ -30,8 +30,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function GraficoEspecies({ data: propsData }: { data?: any[] }) {
   const chartData = propsData || fallback
   return (
-    <div className="bg-[#13141C]/40 backdrop-blur-2xl border border-white/5 p-8 rounded-[32px] shadow-2xl transition-all hover:border-white/10 group overflow-hidden relative">
-      <div className="absolute -right-16 -bottom-16 w-32 h-32 bg-blue-500/5 blur-[60px] pointer-events-none rounded-full" />
+    <div className="bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-2xl transition-all hover:border-white/20 group overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="flex items-center justify-between mb-8 relative z-10">
         <div className="flex items-center gap-3">

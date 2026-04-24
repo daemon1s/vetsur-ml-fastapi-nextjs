@@ -140,9 +140,34 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = []
         </marker>
       </defs>
 
-      <path id={id} d={path} fill="none" stroke={color} strokeWidth="1.5" strokeOpacity="0.1" strokeDasharray={isDashed ? "4 4" : "none"} markerEnd={`url(#arrow-${id})`} />
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth="8"
+        strokeOpacity="0.2"
+        className="blur-[6px]"
+      />
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth="4"
+        strokeOpacity="0.3"
+        className="blur-[2px]"
+      />
 
-      {/* Requests */}
+      <path
+        id={id}
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeOpacity="0.5"
+        strokeDasharray={isDashed ? "4 4" : "none"}
+        markerEnd={`url(#arrow-${id})`}
+      />
+
       {reqBegins.map((beginTime: number, idx: number) => (
         <circle key={`req-${idx}`} r="5" fill={color} opacity="0" className="filter drop-shadow-[0_0_15px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
           <animateMotion dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} calcMode="linear" keyPoints="0;1;1;1;1;1;1;1;1;1;1" keyTimes="0;0.05;0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;1">
@@ -152,7 +177,6 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = []
         </circle>
       ))}
 
-      {/* Responses */}
       {resBegins.map((beginTime: number, idx: number) => (
         <circle key={`res-${idx}`} r="4.5" fill={color} opacity="0" className="filter drop-shadow-[0_0_10px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
           <animateMotion dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} keyPoints="1;0;0;0;0;0;0;0;0;0;0" keyTimes="0;0.05;0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;1" calcMode="linear">
@@ -201,10 +225,13 @@ export function DiagramaArquitectura() {
   }, [hoveredNode])
 
   return (
-    <div className="w-full h-full min-h-[65vh] bg-[#0B0C10] rounded-[48px] p-8 md:p-12 overflow-hidden relative border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center">
+    <div className="w-full h-full min-h-[65vh] bg-[#0A0B10] border border-white/10 p-8 md:p-12 rounded-[32px] overflow-hidden relative flex flex-col items-center justify-center">
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[150px] rounded-full" />
+        <div className="absolute inset-0 opacity-[0.05]" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundSize: '80px 80px'
+        }} />
       </div>
 
       <div className="relative z-20 w-full max-w-7xl aspect-[1.7/1] mt-0 scale-95 md:scale-100 transition-transform">
@@ -216,9 +243,7 @@ export function DiagramaArquitectura() {
             <text x={TIERS.DATA.x} y="780" textAnchor="middle" fill={TIERS.DATA.color} style={{ filter: `drop-shadow(0 0 5px ${TIERS.DATA.color}66)` }}>Datos</text>
           </g>
 
-          {/* CONTENEDORES DE INFRAESTRUCTURA */}
           <g className="pointer-events-none">
-            {/* VPS DigitalOcean (Blanco) */}
             <rect x="230" y="20" width="1000" height="730" rx="32" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
             <foreignObject x="260" y="35" width="400" height="50">
               <div className="flex items-center gap-3">
@@ -234,7 +259,6 @@ export function DiagramaArquitectura() {
               </div>
             </foreignObject>
 
-            {/* Docker Compose (Celeste) */}
             <rect x="260" y="80" width="940" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
             <foreignObject x="280" y="95" width="400" height="50">
               <div className="flex items-center gap-3">
@@ -247,23 +271,20 @@ export function DiagramaArquitectura() {
                   className="font-black tracking-[0.2em] text-[11px] text-[#38bdf8] uppercase"
                   style={{ filter: 'drop-shadow(0 0 10px rgba(56,189,248,0.5))' }}
                 >
-                  Contenedor Docker
+                  Red dockerizada
                 </span>
               </div>
             </foreignObject>
           </g>
 
-          {/* Recorrido 1: IA (0-10s) | Recorrido 2: Dashboard (10-20s) */}
-          <Connection start={nodes.user} end={nodes.nginx} label="TLS 1.3" color={TIERS.CLIENT.color} reqBegins={[0, 10]} resBegins={[9, 19]} cycle={20} />
-          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Pass" color={TIERS.GATEWAY.color} reqBegins={[1, 11]} resBegins={[8, 18]} cycle={20} />
-          <Connection start={nodes.front} end={nodes.back} label="Consumo API" color={TIERS.APP.color} reqBegins={[2, 12]} resBegins={[7, 17]} cycle={20} isDashed={true} />
+          <Connection start={nodes.user} end={nodes.nginx} label="Petición HTTPS" color={TIERS.CLIENT.color} reqBegins={[0, 10]} resBegins={[9, 19]} cycle={20} />
+          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Inverso" color={TIERS.GATEWAY.color} reqBegins={[1, 11]} resBegins={[8, 18]} cycle={20} />
+          <Connection start={nodes.front} end={nodes.back} label="Fetch API (JSON)" color={TIERS.APP.color} reqBegins={[2, 12]} resBegins={[7, 17]} cycle={20} isDashed={true} />
 
-          {/* Ramificación Predictor IA (Solo se activa en el primer recorrido) */}
-          <Connection start={nodes.back} end={nodes.model} label="Predictor IA" color={TIERS.APP.color} reqBegins={[3]} resBegins={[6]} cycle={20} />
-          <Connection start={nodes.model} end={nodes.pkl} label="Carga Modelo" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} labelYOffset={35} />
+          <Connection start={nodes.back} end={nodes.model} label="Inferencia IA" color={TIERS.APP.color} reqBegins={[3]} resBegins={[6]} cycle={20} />
+          <Connection start={nodes.model} end={nodes.pkl} label="Carga .PKL" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} labelYOffset={35} />
 
-          {/* Ramificación CSV (Solo se activa en el segundo recorrido) */}
-          <Connection start={nodes.back} end={nodes.db} label="Dashboard" color={TIERS.APP.color} reqBegins={[13]} resBegins={[16]} cycle={20} />
+          <Connection start={nodes.back} end={nodes.db} label="Lectura CSV (Pandas)" color={TIERS.APP.color} reqBegins={[13]} resBegins={[16]} cycle={20} />
 
           <Node
             {...nodes.user} color={TIERS.CLIENT.color}
@@ -277,7 +298,7 @@ export function DiagramaArquitectura() {
             {...nodes.nginx} color={TIERS.GATEWAY.color} port="80/443"
             icon={Server} title="nginx" subtitle="Proxy Inverso"
             description="El director de tráfico del servidor. Recibe todas las visitas y las reparte de forma inteligente entre la web y los servicios de datos de la API."
-            techStack={["Nginx", "OpenSSL", "Docker"]}
+            techStack={["OpenSSL"]}
             logo={
               <svg viewBox="0 0 128 128" className="w-8 h-8">
                 <path fill="#009639" d="M64 0L12.1 30v68L64 128l51.9-30V30L64 0z" />
@@ -319,7 +340,7 @@ export function DiagramaArquitectura() {
             {...nodes.db} color={TIERS.DATA.color}
             icon={FileText} title="Datos de pacientes" subtitle="Registros CSV"
             description="Dataset histórico basado en el archivo CSV de pacientes. Contiene registros clínicos, especies y frecuencia de visitas, sirviendo como input para el entrenamiento."
-            techStack={["CSV", "Pandas", "FileSystem"]}
+            techStack={["Excel", "Pandas", "FileSystem"]}
             logo={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8" style={{ color: TIERS.DATA.color }}>
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" strokeLinecap="round" strokeLinejoin="round" />

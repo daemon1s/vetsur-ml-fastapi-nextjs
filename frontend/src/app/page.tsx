@@ -110,8 +110,9 @@ export default function Dashboard() {
         </div>
 
         {/* Tabla CRM Glassmorphic */}
-        <div className="bg-[#13141C]/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-10 shadow-2xl animate-in-up relative overflow-hidden" style={{ animationDelay: "180ms" }}>
-          <div className="absolute -left-20 -top-20 w-80 h-80 bg-[#1D9E75]/5 blur-[120px] pointer-events-none rounded-full" />
+        <div className="bg-[#0A0B10] border border-white/10 rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in-up relative overflow-hidden" style={{ animationDelay: "180ms" }}>
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.01] to-transparent pointer-events-none" />
 
           <div className="flex items-center justify-between mb-10 relative z-10">
             <div className="flex items-center gap-4">
