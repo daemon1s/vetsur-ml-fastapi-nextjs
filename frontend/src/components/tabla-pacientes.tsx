@@ -22,6 +22,10 @@ export function TablaPacientes() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState("")
 
+  const [activeEspecie, setActiveEspecie] = useState("Todos")
+  const [activeRiesgo, setActiveRiesgo] = useState("Todos")
+  const [activeSucursal, setActiveSucursal] = useState("Todas")
+
   // Normalizador para búsqueda inteligente (ignora tildes y eñes)
   const normalize = (s: string) =>
     s.toLowerCase()
@@ -39,6 +43,16 @@ export function TablaPacientes() {
       "providencia": "Providencia",
       "pudahuel": "Pudahuel",
       "san miguel": "San Miguel"
+    }
+    return map[s.toLowerCase()] || s
+  }
+
+  const displayEspecie = (s: string) => {
+    const map: Record<string, string> = {
+      "exotico": "Exótico",
+      "perro": "Perro",
+      "gato": "Gato",
+      "ave": "Ave"
     }
     return map[s.toLowerCase()] || s
   }
@@ -84,7 +98,11 @@ export function TablaPacientes() {
       header: "Paciente",
       cell: ({ row }: any) => <span className="font-bold text-white/80 tracking-tight">#{row.getValue("paciente_id")}</span>
     },
-    { accessorKey: "especie", header: "Especie" },
+    { 
+      accessorKey: "especie", 
+      header: "Especie",
+      cell: ({ row }: any) => displayEspecie(row.getValue("especie"))
+    },
     {
       accessorKey: "sucursal",
       header: "Sucursal",
@@ -173,24 +191,98 @@ export function TablaPacientes() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-96 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 group-focus-within:text-[#1D9E75] transition-colors" />
-          <input
-            placeholder="Filtrar por ID o Sucursal..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full h-11 pl-12 pr-4 bg-white/5 border border-white/5 focus:border-[#1D9E75]/30 focus:ring-1 focus:ring-[#1D9E75]/10 rounded-2xl text-sm font-medium text-white transition-all outline-none"
-          />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-96 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 group-focus-within:text-[#1D9E75] transition-colors" />
+            <input
+              placeholder="Buscar por ID o Sucursal..."
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="w-full h-11 pl-12 pr-4 bg-white/5 border border-white/5 focus:border-[#1D9E75]/30 focus:ring-1 focus:ring-[#1D9E75]/10 rounded-2xl text-sm font-medium text-white transition-all outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <Button
+              onClick={exportarCSV}
+              className="flex-1 md:flex-none h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-white flex gap-2 font-semibold text-sm rounded-2xl transition-all"
+            >
+              <Download className="h-4 w-4 text-[#1D9E75]" />
+              Exportar excel
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <Button
-            onClick={exportarCSV}
-            className="flex-1 md:flex-none h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-white flex gap-2 font-semibold text-sm rounded-2xl transition-all"
-          >
-            <Download className="h-4 w-4 text-[#1D9E75]" />
-            Exportar excel
-          </Button>
+
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <div className="size-2 rounded-full bg-[#1D9E75] animate-pulse shadow-[0_0_10px_rgba(29,158,117,1)]" />
+            <span className="text-xs font-bold text-white tracking-tight">
+              {table.getFilteredRowModel().rows.length} <span className="text-white/40 font-medium uppercase text-[10px] tracking-widest ml-1">Pacientes encontrados</span>
+            </span>
+          </div>
+          <div className="h-px flex-1 bg-white/5 mx-6 hidden md:block" />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Filtro Especie */}
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Especie</span>
+            <select
+              value={activeEspecie}
+              onChange={(e) => {
+                const val = e.target.value
+                setActiveEspecie(val)
+                table.getColumn("especie")?.setFilterValue(val === "Todos" ? "" : val)
+              }}
+              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-[#1D9E75]/40 transition-all appearance-none cursor-pointer"
+            >
+              <option value="Todos" className="bg-[#13141C]">Todos</option>
+              <option value="Perro" className="bg-[#13141C]">Perro</option>
+              <option value="Gato" className="bg-[#13141C]">Gato</option>
+              <option value="Exotico" className="bg-[#13141C]">Exótico</option>
+              <option value="Ave" className="bg-[#13141C]">Ave</option>
+            </select>
+          </div>
+
+          {/* Filtro Riesgo */}
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Nivel de Riesgo</span>
+            <select
+              value={activeRiesgo}
+              onChange={(e) => {
+                const val = e.target.value
+                setActiveRiesgo(val)
+                table.getColumn("nivel_riesgo")?.setFilterValue(val === "Todos" ? "" : val)
+              }}
+              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-amber-500/40 transition-all appearance-none cursor-pointer"
+            >
+              {["Todos", "Alto", "Medio", "Bajo"].map(opt => <option key={opt} value={opt} className="bg-[#13141C]">{opt}</option>)}
+            </select>
+          </div>
+
+          {/* Filtro Sucursal */}
+          <div className="flex flex-col gap-1.5 flex-2 min-w-[200px]">
+            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Sucursal</span>
+            <select
+              value={activeSucursal}
+              onChange={(e) => {
+                const val = e.target.value
+                setActiveSucursal(val)
+                table.getColumn("sucursal")?.setFilterValue(val === "Todas" ? "" : val)
+              }}
+              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-blue-500/40 transition-all appearance-none cursor-pointer"
+            >
+              <option value="Todas" className="bg-[#13141C]">Todas las sucursales</option>
+              <option value="La Florida" className="bg-[#13141C]">La Florida</option>
+              <option value="Las Condes" className="bg-[#13141C]">Las Condes</option>
+              <option value="Maipu" className="bg-[#13141C]">Maipú</option>
+              <option value="Nunoa" className="bg-[#13141C]">Ñuñoa</option>
+              <option value="Penalolen" className="bg-[#13141C]">Peñalolén</option>
+              <option value="Providencia" className="bg-[#13141C]">Providencia</option>
+              <option value="Pudahuel" className="bg-[#13141C]">Pudahuel</option>
+              <option value="San Miguel" className="bg-[#13141C]">San Miguel</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -232,18 +324,15 @@ export function TablaPacientes() {
         </table>
       </div>
 
-      <div className="flex items-center justify-between px-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">
-          Mostrando {table.getRowModel().rows.length} registros
-        </p>
+      <div className="flex items-center justify-end px-2">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all">
+          <Button variant="ghost" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all text-white/50 hover:text-white">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-white/90 uppercase tracking-widest">
             Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
           </span>
-          <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all">
+          <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all text-white/50 hover:text-white">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>

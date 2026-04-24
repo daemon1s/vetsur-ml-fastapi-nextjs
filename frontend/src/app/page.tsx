@@ -38,14 +38,14 @@ export default function Dashboard() {
       {/* Navbar Superior Fijo */}
       <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-6 lg:px-10">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-3 group">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[#1D9E75] to-[#25C08F] shadow-[0_0_20px_rgba(29,158,117,0.2)]">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-[#1D9E75] to-[#25C08F] shadow-[0_0_20px_rgba(29,158,117,0.3)] group-hover:scale-110 transition-transform">
               <Activity className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tighter">
+            <span className="font-black text-xl tracking-tighter">
               VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span>
-            </h1>
-          </div>
+            </span>
+          </Link>
 
           <Link
             href="/predictor"

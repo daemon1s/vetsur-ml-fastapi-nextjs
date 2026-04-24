@@ -44,7 +44,9 @@ class ModeloVetSur:
 
     def _limpiar_texto(self, texto: str) -> str:
         if not texto: return ""
-        t = ftfy.fix_text(texto)
+        # Limpieza manual de mojibake específico (tal cual el notebook del usuario)
+        t = texto.replace('exa³tico', 'exotico').replace('Exa³tico', 'Exotico')
+        t = ftfy.fix_text(t)
         t = "".join(c for c in unicodedata.normalize('NFD', t) if unicodedata.category(c) != 'Mn')
         return t.lower().strip().replace(" ", "_").replace(".", "").replace("-", "_")
 
@@ -99,6 +101,12 @@ class ModeloVetSur:
              return self.resultados_cache
 
         data = df_pacientes if limit is None else df_pacientes.head(limit)
+        
+        # Limpieza manual de mojibake (tal cual el notebook del usuario)
+        if 'especie' in data.columns:
+            data = data.copy()
+            data['especie'] = data['especie'].str.replace('exa³tico', 'Exotico', case=False, regex=False)
+
         mediana_costo = float(data['costo_medicamento'].median()) if 'costo_medicamento' in data.columns else 0
         
         df_clean = data.copy()
