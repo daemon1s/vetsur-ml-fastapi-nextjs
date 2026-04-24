@@ -205,7 +205,7 @@ export function TablaPacientes() {
           <div className="flex items-center gap-3 w-full md:w-auto">
             <Button
               onClick={exportarCSV}
-              className="flex-1 md:flex-none h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-white flex gap-2 font-semibold text-sm rounded-2xl transition-all"
+              className="flex-1 md:flex-none h-11 bg-[#1D9E75]/5 border border-[#1D9E75]/20 hover:bg-[#1D9E75]/10 hover:border-[#1D9E75]/40 text-white flex gap-2.5 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all shadow-[0_0_20px_rgba(29,158,117,0.05)] hover:shadow-[0_0_25px_rgba(29,158,117,0.2)]"
             >
               <Download className="h-4 w-4 text-[#1D9E75]" />
               Exportar excel

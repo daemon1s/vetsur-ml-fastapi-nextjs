@@ -32,6 +32,32 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null
 }
 
+const RenderCustomLegend = (props: any) => {
+  const { payload } = props
+  return (
+    <div className="flex items-center gap-6 pt-8 px-2">
+      {payload.map((entry: any, index: number) => (
+        <div key={`item-${index}`} className="flex items-center gap-2.5 group cursor-default transition-all">
+          <div 
+            className="w-2 h-2 rounded-full transition-all duration-500 group-hover:scale-125" 
+            style={{ 
+              backgroundColor: entry.color,
+              boxShadow: `0 0 12px ${entry.color}88`,
+              filter: `drop-shadow(0 0 2px ${entry.color})`
+            }}
+          />
+          <span 
+            className="text-[9px] font-black uppercase tracking-[0.15em] transition-colors duration-300"
+            style={{ color: `${entry.color}cc` }}
+          >
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function GraficoSucursales({ data: propsData }: { data?: any[] }) {
   const chartData = propsData || fallback
   return (
@@ -60,11 +86,7 @@ export function GraficoSucursales({ data: propsData }: { data?: any[] }) {
               tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Legend
-              iconType="circle"
-              iconSize={6}
-              wrapperStyle={{ paddingTop: '20px', fontSize: "9px", fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}
-            />
+            <Legend content={<RenderCustomLegend />} />
             <Bar dataKey="riesgo" stackId="a" fill="#E24B4A" radius={[0, 0, 0, 0]} name="Alto riesgo" barSize={12} />
             <Bar dataKey="retorno" stackId="a" fill="#1D9E75" radius={[0, 10, 10, 0]} name="Retorno probable" barSize={12} />
           </BarChart>
