@@ -1,9 +1,11 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Outfit } from "next/font/google"
 import "./globals.css"
-import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const outfit = Outfit({ 
+  subsets: ["latin"], 
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: "--font-sans" 
+})
 
 export const metadata: Metadata = {
   title: "VetSur - Dashboard",
@@ -16,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={inter.variable}>
-      <body className={inter.className}>{children}</body>
+    <html lang="es" className={outfit.variable}>
+      <body className={outfit.className}>{children}</body>
     </html>
   )
 }
