@@ -19,7 +19,6 @@ export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono
     <div 
       className="relative overflow-hidden bg-[#13141C]/40 backdrop-blur-2xl border border-white/5 p-8 rounded-[32px] shadow-2xl transition-all hover:border-[#1D9E75]/30 group animate-in-up"
     >
-      {/* Glow de esquina dinámico */}
       <div 
         className="absolute -right-16 -top-16 w-48 h-48 blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
         style={{ backgroundColor: color }}
@@ -33,7 +32,6 @@ export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono
         </div>
 
         <div className="grid grid-cols-2 gap-8 divide-x divide-white/5">
-          {/* Métrica 1 */}
           <div className="space-y-2">
             <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
               {metricaPrincipal.label}
@@ -46,7 +44,6 @@ export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono
             </p>
           </div>
 
-          {/* Métrica 2 */}
           <div className="pl-8 space-y-2">
             <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
               {metricaSecundaria.label}

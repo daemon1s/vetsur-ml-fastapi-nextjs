@@ -26,7 +26,7 @@ export function TablaPacientes() {
   const [activeRiesgo, setActiveRiesgo] = useState("Todos")
   const [activeSucursal, setActiveSucursal] = useState("Todas")
 
-  // Normalizador para búsqueda inteligente (ignora tildes y eñes)
+  // Nota: Esta función normaliza el texto para que la búsqueda sea "inteligente" (ignora tildes).
   const normalize = (s: string) =>
     s.toLowerCase()
       .normalize("NFD")
@@ -224,7 +224,6 @@ export function TablaPacientes() {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          {/* Filtro Especie */}
           <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Especie</span>
             <select
@@ -244,7 +243,6 @@ export function TablaPacientes() {
             </select>
           </div>
 
-          {/* Filtro Riesgo */}
           <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Nivel de Riesgo</span>
             <select
@@ -260,9 +258,9 @@ export function TablaPacientes() {
             </select>
           </div>
 
-          {/* Filtro Sucursal */}
-          <div className="flex flex-col gap-1.5 flex-2 min-w-[200px]">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Sucursal</span>
+            {/* El filtro de sucursal permite segmentar los datos por ubicación geográfica para mejorar la precisión del reporte */}
             <select
               value={activeSucursal}
               onChange={(e) => {

@@ -1,3 +1,4 @@
+# Nota: Usamos una imagen de Node.js sobre Alpine Linux para que sea muy liviana.
 FROM node:20-alpine AS base
 
 # Fase de dependencias
@@ -15,6 +16,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Fase de build
+# Nota: Esta fase compila el código de Next.js para generar la versión de producción.
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -25,6 +27,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build
 
 # Fase de producción
+# Nota: La fase runner es la que finalmente corre en el servidor, solo con lo necesario.
 FROM base AS runner
 WORKDIR /app
 

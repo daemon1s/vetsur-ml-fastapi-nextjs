@@ -1,3 +1,5 @@
+// Nota: Aquí definimos las interfaces de TypeScript. 
+// Esto asegura que el Frontend use exactamente los mismos nombres de campos que el Backend.
 export type NivelRiesgo = "Alto" | "Medio" | "Bajo"
 
 export interface DatosPaciente {
@@ -15,6 +17,7 @@ export interface DatosPaciente {
 }
 
 export interface RespuestaPrediccion {
+  // Nota: Respuesta que envía el modelo de IA después de procesar un paciente.
   probabilidad_retorno: number
   prediccion_clase: number
   nivel_riesgo: NivelRiesgo

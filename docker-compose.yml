@@ -1,5 +1,8 @@
+# Nota: Docker Compose se encarga de "orquestar" todos los componentes. 
+# Levanta el Backend (Python), el Frontend (Next.js) y el Servidor (Nginx) al mismo tiempo.
 services:
   api:
+    # Nota: Este es el contenedor que corre nuestra API de Inteligencia de Negocios (FastAPI).
     build: ./api
     ports: 
       - "8008:8008"
@@ -12,6 +15,7 @@ services:
     env_file: .env
 
   frontend:
+    # Nota: Este contenedor tiene la interfaz de usuario moderna hecha con Next.js y Tailwind.
     build:
       context: ./frontend
       args:
@@ -25,6 +29,7 @@ services:
     env_file: .env
 
   nginx:
+    # Nota: Nginx actúa como el portero (Proxy) para manejar el tráfico y dar seguridad HTTPS.
     image: nginx:alpine
     ports: 
       - "80:80"

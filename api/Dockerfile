@@ -1,3 +1,4 @@
+# Nota: Usamos una imagen ligera de Python 3.11 para construir nuestro contenedor.
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -13,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# El puerto 8008 es el expuesto en docker-compose
+# Nota: Exponemos el puerto 8008 para que el servidor Nginx pueda comunicarse con FastAPI.
 EXPOSE 8008
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8008", "--workers", "1"]

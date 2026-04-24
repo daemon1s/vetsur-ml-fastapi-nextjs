@@ -8,6 +8,7 @@ interface GaugeProps {
 }
 
 export function GaugePrediccion({ probabilidad, riesgo }: GaugeProps) {
+  // Nota: El porcentaje y el color cambian dinámicamente según el nivel de riesgo que devuelve el modelo.
   const percentage = Math.round(probabilidad * 100)
   
   let fill = "#1D9E75" // Verde

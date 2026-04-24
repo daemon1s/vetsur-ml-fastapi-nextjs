@@ -8,18 +8,17 @@ from contextlib import asynccontextmanager
 from esquemas import DatosPaciente, RespuestaPrediccion, PacienteRiesgo
 from modelo import ModeloVetSur
 
-# Carga el predictor ML
+# Nota: Instanciamos el predictor globalmente para que sea accesible desde todos los endpoints.
 predictor = ModeloVetSur(ruta_modelo="modelo_vetsur.pkl", ruta_columnas="columnas_vetsur.json")
 
-# Inicia el modelo al arrancar
-@asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Nota: Esta función se ejecuta automáticamente al arrancar la API para inicializar el modelo.
     predictor.inicializar()
     yield
 
 app = FastAPI(title="VetSur API", version="1.0.0", lifespan=lifespan)
 
-# Cors para el front
+# Nota: Configuramos CORS para permitir que el frontend (Next.js) pueda consultar la API sin bloqueos de seguridad.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,6 +29,7 @@ app.add_middleware(
 
 @app.get("/salud")
 async def health_check():
+    # Nota: Endpoint simple para verificar que la API y el modelo están operativos.
     return {
         "status": "operativo", 
         "modelo_listo": predictor._inicializado and predictor.modelo is not None
@@ -37,21 +37,24 @@ async def health_check():
 
 @app.post("/predecir", response_model=RespuestaPrediccion)
 async def procesar_prediccion(datos: DatosPaciente):
+    # Nota: Recibe los datos del formulario y devuelve la probabilidad de abandono calculada por el modelo.
     try:
         resultado = predictor.predecir_uno(datos)
         return RespuestaPrediccion(**resultado)
     except Exception as e:
+        # Nota: El error 500 indica que algo falló internamente en el servidor o en el modelo.
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 @app.get("/pacientes-en-riesgo", response_model=List[PacienteRiesgo])
 async def evaluar_pacientes_pendientes():
+    # Nota: Procesa el CSV original y detecta los pacientes que requieren contacto urgente según el modelo.
     try:
         ruta_csv = "caso1_vetsur.csv"
         if not os.path.exists(ruta_csv):
             return []
             
         df = pd.read_csv(ruta_csv, encoding='latin1')
-        df_riesgo = predictor.predecir_lote(df, limit=None) # Liberamos todos los registros para visibilidad total
+        df_riesgo = predictor.predecir_lote(df, limit=None)
         
         lista_riesgo = []
         for _, row in df_riesgo.iterrows():
@@ -64,13 +67,15 @@ async def evaluar_pacientes_pendientes():
 
 @app.get("/estadisticas")
 async def obtener_estadisticas():
+    # Nota: Agrupa y calcula los indicadores clave (KPIs) para mostrar en los gráficos del dashboard.
     try:
         ruta_csv = "caso1_vetsur.csv"
         if not os.path.exists(ruta_csv):
+             # Nota: El error 404 se usa cuando un recurso (como el archivo CSV) no se encuentra.
              raise HTTPException(status_code=404, detail="CSV no encontrado")
              
         df = pd.read_csv(ruta_csv, encoding='latin1')
-        df_resultados = predictor.predecir_lote(df, limit=None) # Procesamos todos
+        df_resultados = predictor.predecir_lote(df, limit=None)
         
         total = len(df_resultados)
         alto_riesgo_df = df_resultados[df_resultados['nivel_riesgo'] == 'Alto']

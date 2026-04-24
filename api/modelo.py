@@ -8,9 +8,15 @@ import os
 from typing import Dict, Any, Tuple
 from esquemas import DatosPaciente
 
+
+# Configuración de logging para el servidor
 logger = logging.getLogger("uvicorn.error")
 
+# Nota: Se utiliza el patrón Singleton para asegurar que el modelo se cargue una sola vez en memoria.
+# Esto evita lentitud en el servidor al no tener que leer el archivo .pkl en cada petición.
 class ModeloVetSur:
+    # Nota: Esta clase se encarga de la carga del modelo Random Forest y la lógica 
+    # de preprocesamiento de datos para la predicción.
     _instancia = None
 
     def __new__(cls, *args, **kwargs):
@@ -33,6 +39,7 @@ class ModeloVetSur:
         self._inicializado = True
 
     def inicializar(self) -> None:
+        # Nota: Carga los archivos del modelo y la lista de columnas exportadas desde el notebook.
         try:
             if os.path.exists(self.ruta_modelo):
                 self.modelo = joblib.load(self.ruta_modelo)
@@ -43,8 +50,9 @@ class ModeloVetSur:
             logger.error(f"Error cargando modelo: {e}")
 
     def _limpiar_texto(self, texto: str) -> str:
+        # Nota: Esta función normaliza el texto para que coincida con las columnas del modelo.
+        # Elimina tildes, corrige errores de codificación y convierte a formato snake_case.
         if not texto: return ""
-        # Limpieza manual de mojibake específico (tal cual el notebook del usuario)
         t = texto.replace('exa³tico', 'exotico').replace('Exa³tico', 'Exotico')
         t = ftfy.fix_text(t)
         t = "".join(c for c in unicodedata.normalize('NFD', t) if unicodedata.category(c) != 'Mn')
@@ -59,6 +67,8 @@ class ModeloVetSur:
             return "Bajo", "Programar recordatorio estándar en sistema, paciente leal."
 
     def predecir_uno(self, datos: DatosPaciente) -> Dict[str, Any]:
+        # Nota: Procesa los datos de un solo paciente recibidos desde el formulario manual.
+        # Creamos un DataFrame vacío con las 44 columnas que el modelo espera recibir.
         df_input = pd.DataFrame([0] * len(self.columnas_esperadas), index=self.columnas_esperadas).T
         
         monto = datos.monto_cobrado if datos.monto_cobrado > 0 else self.MEDIANA_MONTO
@@ -78,12 +88,14 @@ class ModeloVetSur:
             "raza_registrada": 1 if datos.raza_registrada else 0
         }
         
+        # Nota: Aquí activamos con un '1' las columnas que corresponden a las categorías del paciente.
         for col, val in mapping.items():
             if col in df_input.columns:
                 df_input[col] = val
 
         if self.modelo:
-            prob = self.modelo.predict_proba(df_input)[0][0] # Proba de no retorno
+            # Cálculo de probabilidad de abandono (Clase 0)
+            prob = self.modelo.predict_proba(df_input)[0][0]
         else:
             prob = 0.5
             
@@ -96,13 +108,15 @@ class ModeloVetSur:
         }
 
     def predecir_lote(self, df_pacientes: pd.DataFrame, limit: int = 50) -> pd.DataFrame:
+        # Nota: Esta función procesa el archivo CSV completo para alimentar el dashboard.
+        # Usa una caché para que la interfaz sea rápida al navegar entre pestañas.
         if df_pacientes.empty: return pd.DataFrame()
         if limit is None and self.resultados_cache is not None:
              return self.resultados_cache
 
         data = df_pacientes if limit is None else df_pacientes.head(limit)
         
-        # Limpieza manual de mojibake (tal cual el notebook del usuario)
+        # Sincronización de categorías específicas detectadas en el dataset
         if 'especie' in data.columns:
             data = data.copy()
             data['especie'] = data['especie'].str.replace('exa³tico', 'Exotico', case=False, regex=False)
@@ -122,11 +136,12 @@ class ModeloVetSur:
         df_prep['edad_mascota_anios'] = df_clean['edad_mascota_anios'].fillna(0)
         df_prep['raza_registrada'] = df_clean['raza_registrada'].apply(lambda x: 1 if x is True or x == 1 else 0)
 
-        # One hot encoding manual
+        # Mapeo dinámico de variables categóricas (One-Hot Encoding)
         for col in self.columnas_esperadas:
             if col not in df_prep.columns:
                 df_prep[col] = 0
                 
+        # Nota: Realizamos el One-Hot Encoding manual comparando contra la lista de columnas permitidas.
         for cat_col, prefix in [('especie', 'especie_'), ('sucursal', 'sucursal_'), ('tipo_atencion', 'tipo_atencion_'), ('diagnostico_texto', 'diagnostico_texto_')]:
             if cat_col in df_clean.columns:
                 for val in df_clean[cat_col].unique():
@@ -157,7 +172,6 @@ class ModeloVetSur:
                 "accion_sugerida": accion
             })
         
-        # Ordenamos por probabilidad de abandono descendente (Más riesgo arriba)
         res.sort(key=lambda x: x["probabilidad_abandono"], reverse=True)
         
         df_res = pd.DataFrame(res)
