@@ -31,7 +31,7 @@ No se optó por la eliminación de registros, sino por una reconstrucción lógi
 - **Refactorización de esquema:** evolución de un esquema estrella a un **esquema de galaxia**, separando los hechos de atención (`FACT_ATENCION`) de los movimientos de inventario (`FACT_INVENTARIO`).
 
 <p align="center">
-  <img src="docs/diagrama_galaxia.png" alt="Esquema de galaxia - vetsur" width="800">
+  <img src="docs/diagrama_galaxia.png?v=2" alt="Esquema de galaxia - vetsur" width="800">
   <br>
   <em>Diagrama de modelado: separación de hechos de atención e inventario compartiendo dimensiones clave.</em>
 </p>
