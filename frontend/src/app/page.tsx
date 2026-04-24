@@ -117,7 +117,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#1D9E75] to-transparent shadow-[0_0_15px_rgba(29,158,117,0.3)]" />
               <div className="space-y-0.5">
-                <h2 className="text-xl font-bold text-white tracking-tight">Panel de acción CRM</h2>
+                <h2 className="text-xl font-bold text-white tracking-tight">Dashboard</h2>
               </div>
             </div>
           </div>

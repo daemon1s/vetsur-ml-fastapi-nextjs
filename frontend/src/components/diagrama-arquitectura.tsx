@@ -110,7 +110,7 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
 
           <div className="text-center space-y-1">
             <h3 className="text-[13px] font-black text-white tracking-tight leading-none">{title}</h3>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40" style={{ color }}>
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color, filter: `drop-shadow(0 0 5px ${color}66)` }}>
               {subtitle}
             </p>
           </div>
@@ -127,11 +127,10 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
 }
 
 
-const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, delay = 0 }: any) => {
+const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = [], resBegins = [], cycle = 20, isDashed = false }: any) => {
   const id = React.useId().replace(/:/g, "")
   const dx = end.x - start.x
   const dy = end.y - start.y
-
   const path = `M ${start.x} ${start.y} C ${start.x + dx / 2} ${start.y}, ${start.x + dx / 2} ${end.y}, ${end.x} ${end.y}`
 
   return (
@@ -142,37 +141,27 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, duration = 4, 
         </marker>
       </defs>
 
-      <path
-        id={id}
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeOpacity="0.1"
-        strokeDasharray="4 4"
-        markerEnd={`url(#arrow-${id})`}
-      />
+      <path id={id} d={path} fill="none" stroke={color} strokeWidth="1.5" strokeOpacity="0.1" strokeDasharray={isDashed ? "4 4" : "none"} markerEnd={`url(#arrow-${id})`} />
 
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth="4"
-        strokeOpacity="0"
-        className="group-hover:stroke-opacity-10 transition-all duration-300 cursor-pointer"
-      />
+      {/* Requests */}
+      {reqBegins.map((beginTime: number, idx: number) => (
+        <circle key={`req-${idx}`} r="5" fill={color} opacity="0" className="filter drop-shadow-[0_0_15px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
+          <animateMotion dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} calcMode="linear" keyPoints="0;1;1;1;1;1;1;1;1;1;1" keyTimes="0;0.05;0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;1">
+            <mpath href={`#${id}`} />
+          </animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.04;0.05;1" dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} />
+        </circle>
+      ))}
 
-      <circle r="3" fill={color} className="filter drop-shadow-[0_0_8px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
-        <animateMotion dur={`${duration}s`} repeatCount="indefinite" begin={`${delay}s`} calcMode="spline" keySplines="0.4 0 0.2 1">
-          <mpath href={`#${id}`} />
-        </animateMotion>
-      </circle>
-
-      <circle r="2" fill={color} fillOpacity="0.3">
-        <animateMotion dur={`${duration}s`} repeatCount="indefinite" begin={`${delay + duration * 0.7}s`} keyPoints="1;0" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
-          <mpath href={`#${id}`} />
-        </animateMotion>
-      </circle>
+      {/* Responses */}
+      {resBegins.map((beginTime: number, idx: number) => (
+        <circle key={`res-${idx}`} r="4.5" fill={color} opacity="0" className="filter drop-shadow-[0_0_10px_var(--glow-color)]" style={{ "--glow-color": color } as any}>
+          <animateMotion dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} keyPoints="1;0;0;0;0;0;0;0;0;0;0" keyTimes="0;0.05;0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;1" calcMode="linear">
+            <mpath href={`#${id}`} />
+          </animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.04;0.05;1" dur={`${cycle}s`} repeatCount="indefinite" begin={`${beginTime}s`} />
+        </circle>
+      ))}
 
       {label && (
         <foreignObject x={(start.x + end.x) / 2 - 60} y={(start.y + end.y) / 2 - 12} width="120" height="24" className="overflow-visible pointer-events-none">
@@ -198,8 +187,9 @@ export function DiagramaArquitectura() {
     nginx: { x: TIERS.GATEWAY.x, y: 350 },
     front: { x: TIERS.APP.x, y: 180 },
     back: { x: TIERS.APP.x, y: 520 },
-    db: { x: TIERS.DATA.x, y: 420 },
-    model: { x: TIERS.DATA.x, y: 620 }
+    db: { x: TIERS.DATA.x, y: 250 },
+    pkl: { x: TIERS.DATA.x, y: 450 },
+    model: { x: TIERS.DATA.x, y: 650 }
   }), [])
 
   useEffect(() => {
@@ -215,7 +205,6 @@ export function DiagramaArquitectura() {
     <div className="w-full h-full min-h-[65vh] bg-[#0B0C10] rounded-[48px] p-8 md:p-12 overflow-hidden relative border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center">
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[150px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[150px] rounded-full" />
       </div>
 
@@ -244,13 +233,17 @@ export function DiagramaArquitectura() {
             <text x={TIERS.DATA.x} y="730" textAnchor="middle" fill={TIERS.DATA.color}>Datos</text>
           </g>
 
-          <Connection start={nodes.user} end={nodes.nginx} label="TLS 1.3" color={TIERS.CLIENT.color} duration={5} />
-          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Pass" color={TIERS.GATEWAY.color} duration={4} delay={0.2} />
+          {/* Recorrido 1: IA (0-10s) | Recorrido 2: Dashboard (10-20s) */}
+          <Connection start={nodes.user} end={nodes.nginx} label="TLS 1.3" color={TIERS.CLIENT.color} reqBegins={[0, 10]} resBegins={[9, 19]} cycle={20} />
+          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Pass" color={TIERS.GATEWAY.color} reqBegins={[1, 11]} resBegins={[8, 18]} cycle={20} />
+          <Connection start={nodes.front} end={nodes.back} label="Consumo API" color={TIERS.APP.color} reqBegins={[2, 12]} resBegins={[7, 17]} cycle={20} isDashed={true} />
 
-          <Connection start={nodes.front} end={nodes.back} label="Consumo API" color={TIERS.APP.color} duration={3} delay={1.5} isDashed={true} />
+          {/* Ramificación Predictor IA (Solo se activa en el primer recorrido) */}
+          <Connection start={nodes.back} end={nodes.model} label="Predictor IA" color={TIERS.APP.color} reqBegins={[3]} resBegins={[6]} cycle={20} />
+          <Connection start={nodes.model} end={nodes.pkl} label="Carga Modelo" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} />
 
-          <Connection start={nodes.back} end={nodes.db} label="Lectura CSV" color={TIERS.APP.color} duration={3} delay={0.1} />
-          <Connection start={nodes.back} end={nodes.model} label="Random Forest" color={TIERS.APP.color} duration={3} delay={1.1} />
+          {/* Ramificación CSV (Solo se activa en el segundo recorrido) */}
+          <Connection start={nodes.back} end={nodes.db} label="Dashboard" color={TIERS.APP.color} reqBegins={[13]} resBegins={[16]} cycle={20} />
 
           <Node
             {...nodes.user} color={TIERS.CLIENT.color}
@@ -318,10 +311,18 @@ export function DiagramaArquitectura() {
           />
 
           <Node
+            {...nodes.pkl} color={TIERS.DATA.color}
+            icon={ShieldCheck} title="Modelo Vetsur" subtitle="Archivo .PKL"
+            description="Archivo binario serializado que contiene la estructura y pesos del modelo RandomForestClassifier tras el entrenamiento."
+            techStack={["Pickle", "Joblib", "Binary"]}
+            onHover={setHoveredNode}
+          />
+
+          <Node
             {...nodes.model} color={TIERS.DATA.color} isSingleton={true}
             icon={Trees} title="Predictor IA" subtitle="Random Forest"
-            description="Inteligencia artificial que analiza el comportamiento clínico para predecir si un paciente podría no volver, sugiriendo acciones para recuperarlo."
-            techStack={["Scikit-Learn", "Joblib", "NumPy"]}
+            description="Instancia activa del modelo en memoria RAM. Recibe datos en tiempo real y devuelve probabilidades de abandono (Churn)."
+            techStack={["Scikit-Learn", "NumPy", "RAM Singleton"]}
             onHover={setHoveredNode}
           />
 
