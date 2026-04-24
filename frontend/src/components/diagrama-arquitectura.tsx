@@ -11,7 +11,6 @@ import {
   FileText,
   Trees,
   BrainCircuit,
-  Container,
   Cloud,
   ShieldCheck,
   ChevronRight,
@@ -127,7 +126,7 @@ const Node = ({ x, y, icon: Icon, title, subtitle, color, port, isSingleton, log
 }
 
 
-const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = [], resBegins = [], cycle = 20, isDashed = false }: any) => {
+const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = [], resBegins = [], cycle = 20, isDashed = false, labelYOffset = 0 }: any) => {
   const id = React.useId().replace(/:/g, "")
   const dx = end.x - start.x
   const dy = end.y - start.y
@@ -164,9 +163,9 @@ const Connection = ({ start, end, label, color = TIERS.APP.color, reqBegins = []
       ))}
 
       {label && (
-        <foreignObject x={(start.x + end.x) / 2 - 60} y={(start.y + end.y) / 2 - 12} width="120" height="24" className="overflow-visible pointer-events-none">
-          <div className="flex items-center justify-center w-full h-full opacity-90 group-hover:opacity-100 transition-opacity">
-            <div className="bg-[#13141C]/90 backdrop-blur-md border border-white/10 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-xl">
+        <foreignObject x={(start.x + end.x) / 2 - 60} y={(start.y + end.y) / 2 - 32 + labelYOffset} width="120" height="24" className="overflow-visible pointer-events-none">
+          <div className="flex items-center justify-center w-full h-full transition-opacity">
+            <div className="bg-[#13141C] border border-white/10 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-xl">
               <ArrowRightLeft className="w-2.5 h-2.5" style={{ color }} />
               <span className="text-[8px] font-bold text-white uppercase tracking-widest">{label}</span>
             </div>
@@ -187,9 +186,9 @@ export function DiagramaArquitectura() {
     nginx: { x: TIERS.GATEWAY.x, y: 350 },
     front: { x: TIERS.APP.x, y: 180 },
     back: { x: TIERS.APP.x, y: 520 },
-    db: { x: TIERS.DATA.x, y: 250 },
-    pkl: { x: TIERS.DATA.x, y: 450 },
-    model: { x: TIERS.DATA.x, y: 650 }
+    db: { x: TIERS.DATA.x, y: 220 },
+    pkl: { x: TIERS.DATA.x, y: 420 },
+    model: { x: TIERS.DATA.x, y: 620 }
   }), [])
 
   useEffect(() => {
@@ -208,29 +207,50 @@ export function DiagramaArquitectura() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[150px] rounded-full" />
       </div>
 
-      <div className="absolute top-10 left-10 right-10 flex justify-between items-end z-0">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-white font-bold text-3xl tracking-tight">Arquitectura de la solución</h2>
-          </div>
-        </div>
+      <div className="relative z-20 w-full max-w-7xl aspect-[1.7/1] mt-0 scale-95 md:scale-100 transition-transform">
+        <svg ref={svgRef} viewBox="50 0 1200 760" className="w-full h-full overflow-visible">
+          <g className="pointer-events-none font-bold uppercase tracking-[0.2em] text-[12px]">
+            <text x={TIERS.CLIENT.x} y="780" textAnchor="middle" fill={TIERS.CLIENT.color} style={{ filter: `drop-shadow(0 0 5px ${TIERS.CLIENT.color}66)` }}>Cliente</text>
+            <text x={TIERS.GATEWAY.x} y="780" textAnchor="middle" fill={TIERS.GATEWAY.color} style={{ filter: `drop-shadow(0 0 5px ${TIERS.GATEWAY.color}66)` }}>Pasarela</text>
+            <text x={TIERS.APP.x} y="780" textAnchor="middle" fill={TIERS.APP.color} style={{ filter: `drop-shadow(0 0 5px ${TIERS.APP.color}66)` }}>Servicios</text>
+            <text x={TIERS.DATA.x} y="780" textAnchor="middle" fill={TIERS.DATA.color} style={{ filter: `drop-shadow(0 0 5px ${TIERS.DATA.color}66)` }}>Datos</text>
+          </g>
 
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-xl">
-            <Cloud className="w-4 h-4 text-blue-400" />
-            <span className="text-[11px] font-black text-white/80 uppercase">Servidor VPS (DigitalOcean)</span>
-          </div>
-        </div>
-      </div>
+          {/* CONTENEDORES DE INFRAESTRUCTURA */}
+          <g className="pointer-events-none">
+            {/* VPS DigitalOcean (Blanco) */}
+            <rect x="230" y="20" width="1000" height="730" rx="32" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+            <foreignObject x="260" y="35" width="400" height="50">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 shadow-2xl">
+                  <Cloud className="w-4 h-4 text-white/80" />
+                </div>
+                <span
+                  className="font-black tracking-[0.2em] text-[13px] text-white uppercase"
+                  style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}
+                >
+                  Servidor VPS (DigitalOcean)
+                </span>
+              </div>
+            </foreignObject>
 
-      <div className="relative z-20 w-full max-w-7xl aspect-[1.8/1] mt-10 scale-90 md:scale-100 transition-transform">
-        <svg ref={svgRef} viewBox="0 0 1250 750" className="w-full h-full overflow-visible">
-
-          <g className="opacity-50 pointer-events-none font-black text-[12px] uppercase tracking-[0.5em]">
-            <text x={TIERS.CLIENT.x} y="730" textAnchor="middle" fill={TIERS.CLIENT.color}>Cliente</text>
-            <text x={TIERS.GATEWAY.x} y="730" textAnchor="middle" fill={TIERS.GATEWAY.color}>Pasarela</text>
-            <text x={TIERS.APP.x} y="730" textAnchor="middle" fill={TIERS.APP.color}>Servicios</text>
-            <text x={TIERS.DATA.x} y="730" textAnchor="middle" fill={TIERS.DATA.color}>Datos</text>
+            {/* Docker Compose (Celeste) */}
+            <rect x="260" y="80" width="940" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
+            <foreignObject x="280" y="95" width="400" height="50">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#38bdf8]/10 border border-[#38bdf8]/20 shadow-2xl">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#38bdf8]" style={{ filter: 'drop-shadow(0 0 5px rgba(56,189,248,0.8))' }}>
+                    <path d="M13.983 11.078h2.119v-2.13h-2.119v2.13zm3.337-2.13v2.13h2.12v-2.13h-2.12zm3.313 2.13h2.119v-2.13h-2.119v2.13zm-3.313-2.621h2.12v-2.13h-2.12v2.13zm3.313 0h2.119v-2.13h-2.119v2.13zm-6.65 0h2.119v-2.13h-2.119v2.13zm-3.325 0h2.12v-2.13h-2.12v2.13zm3.325-2.621h2.119v-2.13h-2.119v2.13zm0-2.621h2.119v-2.13h-2.119v2.13zM0 12.584c0 .351.025.702.073 1.053.159 2.015.86 4.029 2.1 5.485 2.13 2.505 5.617 3.325 8.411 2.378 1.576-.537 2.92-1.442 4.053-2.614.074-.085.11-.183.11-.293v-3.515h-1.55v2.86c-.161.272-.41.488-.707.61-1.073.44-2.293.305-3.232-.342a3.14 3.14 0 01-1.28-2.123h12.522c.162-.23.272-.486.333-.755.33-1.482.162-3.036-.45-4.417-.611-1.38-1.65-2.506-2.905-3.203-.255-.145-.514-.27-.78-.377a7.502 7.502 0 00-.776-.254c-.267-.066-.543-.11-.82-.132h-5.418v2.132H9.28V9.589H6.764v2.132h2.513v.863H0v-.004z" />
+                  </svg>
+                </div>
+                <span
+                  className="font-black tracking-[0.2em] text-[11px] text-[#38bdf8] uppercase"
+                  style={{ filter: 'drop-shadow(0 0 10px rgba(56,189,248,0.5))' }}
+                >
+                  Contenedor Docker
+                </span>
+              </div>
+            </foreignObject>
           </g>
 
           {/* Recorrido 1: IA (0-10s) | Recorrido 2: Dashboard (10-20s) */}
@@ -240,14 +260,14 @@ export function DiagramaArquitectura() {
 
           {/* Ramificación Predictor IA (Solo se activa en el primer recorrido) */}
           <Connection start={nodes.back} end={nodes.model} label="Predictor IA" color={TIERS.APP.color} reqBegins={[3]} resBegins={[6]} cycle={20} />
-          <Connection start={nodes.model} end={nodes.pkl} label="Carga Modelo" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} />
+          <Connection start={nodes.model} end={nodes.pkl} label="Carga Modelo" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} labelYOffset={35} />
 
           {/* Ramificación CSV (Solo se activa en el segundo recorrido) */}
           <Connection start={nodes.back} end={nodes.db} label="Dashboard" color={TIERS.APP.color} reqBegins={[13]} resBegins={[16]} cycle={20} />
 
           <Node
             {...nodes.user} color={TIERS.CLIENT.color}
-            icon={Globe} title="Navegador web" subtitle="Interfaz de usuario"
+            icon={Globe} title="vetsur.daemonize.me" subtitle="Navegador web"
             description="Interfaz reactiva que consume la API de FastAPI para visualizar KPIs de retención, gráficos de distribución y el panel de control de riesgo en tiempo real."
             techStack={["Tailwind CSS", "Framer Motion", "Lucide Icons"]}
             onHover={setHoveredNode}
@@ -255,7 +275,7 @@ export function DiagramaArquitectura() {
 
           <Node
             {...nodes.nginx} color={TIERS.GATEWAY.color} port="80/443"
-            icon={Server} title="Nginx" subtitle="Proxy Inverso"
+            icon={Server} title="nginx" subtitle="Proxy Inverso"
             description="El director de tráfico del servidor. Recibe todas las visitas y las reparte de forma inteligente entre la web y los servicios de datos de la API."
             techStack={["Nginx", "OpenSSL", "Docker"]}
             logo={
