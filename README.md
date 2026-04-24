@@ -15,6 +15,8 @@
 ---
 
 ## El desafío del negocio
+> **Nota:** Este proyecto es un **ejercicio académico** basado en un caso de estudio para Vetsur Servicios Veterinarios SpA.
+
 A pesar de facturar aprox. $2.800 millones anuales, Vetsur operaba con sistemas locales (VetManager) y silos de información. Rodrigo Maturana, el fundador, carecía de visibilidad sobre la rentabilidad real de cada sede y el desempeño de los 47 empleados. 
 
 ## Vista del dashboard
