@@ -7,7 +7,7 @@ services:
     ports: 
       - "8008:8008"
     mem_limit: 512m
-    restart: unless-stopped
+    restart: always
     volumes: 
       - ./api/modelo_vetsur.pkl:/app/modelo_vetsur.pkl
       - ./api/columnas_vetsur.json:/app/columnas_vetsur.json
@@ -23,7 +23,7 @@ services:
     ports: 
       - "3000:3000"
     mem_limit: 512m
-    restart: unless-stopped
+    restart: always
     depends_on: 
       - api
     env_file: .env
@@ -41,4 +41,4 @@ services:
     depends_on: 
       - api
       - frontend
-    restart: unless-stopped
+    restart: always
