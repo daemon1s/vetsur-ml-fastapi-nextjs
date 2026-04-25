@@ -1,9 +1,8 @@
 # Nota: Docker Compose se encarga de "orquestar" todos los componentes. 
-# Levanta el Backend (Python), el Frontend (Next.js) y el Servidor (Nginx) al mismo tiempo.
+# Ahora descarga las imágenes pre-construidas desde Docker Hub.
 services:
   api:
-    # Nota: Este es el contenedor que corre nuestra API de Inteligencia de Negocios (FastAPI).
-    build: ./api
+    image: daemon1s/vetsur-api:latest
     ports: 
       - "8008:8008"
     mem_limit: 512m
@@ -15,11 +14,7 @@ services:
     env_file: .env
 
   frontend:
-    # Nota: Este contenedor tiene la interfaz de usuario moderna hecha con Next.js y Tailwind.
-    build:
-      context: ./frontend
-      args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    image: daemon1s/vetsur-frontend:latest
     ports: 
       - "3000:3000"
     mem_limit: 512m
@@ -29,7 +24,6 @@ services:
     env_file: .env
 
   nginx:
-    # Nota: Nginx actúa como el portero (Proxy) para manejar el tráfico y dar seguridad HTTPS.
     image: nginx:alpine
     ports: 
       - "80:80"
