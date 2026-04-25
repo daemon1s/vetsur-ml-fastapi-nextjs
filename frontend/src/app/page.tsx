@@ -83,7 +83,7 @@ export default function Dashboard() {
               subtexto: "promedio histórico"
             }}
             icono={Activity}
-            color="#ef4444"
+            color="#1D9E75"
           />
 
           <TarjetaKpiML

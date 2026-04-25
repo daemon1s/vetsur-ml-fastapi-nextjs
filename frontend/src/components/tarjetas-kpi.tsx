@@ -27,8 +27,8 @@ export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono
       
       <div className="relative z-10 space-y-8">
         <div className="flex justify-between items-center">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 shadow-inner">
-            <Icono className="h-5 w-5 text-white/40 group-hover:text-white transition-colors duration-500" />
+          <div className="p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
+            <Icono className="h-4 w-4 transition-colors duration-500" style={{ color }} />
           </div>
         </div>
 
