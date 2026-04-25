@@ -20,5 +20,5 @@ jobs:
             cd ~/vetsur-ml-fastapi-nextjs
             git fetch --all
             git reset --hard origin/main
-            docker-compose up --build -d
+            docker compose up --build -d
             docker image prune -f
