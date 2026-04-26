@@ -136,7 +136,7 @@ class ModeloVetSur:
         df_prep['edad_mascota_anios'] = df_clean['edad_mascota_anios'].fillna(0)
         df_prep['raza_registrada'] = df_clean['raza_registrada'].apply(lambda x: 1 if x is True or x == 1 else 0)
 
-        # Mapeo dinámico de variables categóricas (One-Hot Encoding)
+        # Mapeo de variables categóricas (One-Hot Encoding)
         for col in self.columnas_esperadas:
             if col not in df_prep.columns:
                 df_prep[col] = 0

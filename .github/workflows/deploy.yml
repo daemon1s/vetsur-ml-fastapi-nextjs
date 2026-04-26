@@ -3,6 +3,16 @@ name: Build and Deploy to VPS
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
   workflow_dispatch:
 
 jobs:
