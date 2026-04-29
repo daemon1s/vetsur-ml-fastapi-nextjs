@@ -23,7 +23,7 @@ Vetsur enfrentaba un escenario crítico: a pesar de facturar aprox. $2.800 millo
 - **Entendimiento y preparación:** el proceso se inició con datos en bruto de **Excel**. Se utilizó **Google Colab** para la limpieza inicial y el análisis exploratorio.
 - **Ingeniería de datos (ETL):** se diseñó un pipeline de transformación para convertir datos ruidosos en conocimiento útil, exportando las características en **JSON** y guardando los metadatos para la inferencia.
 - **Modelado predictivo:** se entrenó un modelo de **Random Forest** para capturar patrones de comportamiento de los pacientes. El modelo final se guardó en formato **PKL**.
-- **Despliegue de producto:** finalmente, se trasladó la lógica del notebook a una arquitectura de microservicios con una **API en FastAPI** y un **frontend** para facilitar la consulta de predicciones.
+- **Despliegue de producto:** finalmente, se trasladó la lógica del notebook a una **arquitectura desacoplada**, separando el motor de lógica (API en FastAPI) de la interfaz de usuario para facilitar la consulta de predicciones.
 
 ## Vista de la plataforma
 <p align="center">
@@ -69,7 +69,7 @@ Se ha implementado un flujo automático para garantizar que el sistema sea fáci
   <img src="docs/vetsur.drawio.png" alt="Arquitectura del sistema" width="800">
 </p>
 
-La plataforma funciona con una infraestructura de microservicios, e incluye una [sección de arquitectura interactiva](https://vetsur.daemonize.me/arquitectura) para explicar el flujo de datos.
+La plataforma funciona con una arquitectura de **servicios independientes**, e incluye una [sección de arquitectura interactiva](https://vetsur.daemonize.me/arquitectura) para explicar el flujo de datos.
 
 - **Frontend (interfaz reactiva):**
     - **Framework:** Next.js 14 (App Router) con TypeScript.
