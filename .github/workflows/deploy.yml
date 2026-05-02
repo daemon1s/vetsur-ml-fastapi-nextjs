@@ -8,6 +8,11 @@ on:
       - 'frontend/**'
       - 'docker-compose.yml'
       - '.github/workflows/deploy.yml'
+    paths-ignore:
+      - 'notebooks/**'
+      - 'scripts/**'
+      - 'README.md'
+      - 'Caso1_VetSur.pdf'
   workflow_dispatch:
 
 jobs:
