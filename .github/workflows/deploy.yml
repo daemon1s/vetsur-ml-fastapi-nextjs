@@ -8,11 +8,6 @@ on:
       - 'frontend/**'
       - 'docker-compose.yml'
       - '.github/workflows/deploy.yml'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
   workflow_dispatch:
 
 jobs:
