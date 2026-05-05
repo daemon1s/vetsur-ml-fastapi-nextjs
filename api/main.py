@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from typing import List, Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
@@ -27,7 +27,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/salud")
+# Nota: Creamos un router con el prefijo /api para que coincida con la configuración del frontend.
+api_router = APIRouter(prefix="/api")
+
+@api_router.get("/salud")
 async def health_check():
     # Nota: Endpoint simple para verificar que la API y el modelo están operativos.
     return {
@@ -35,7 +38,7 @@ async def health_check():
         "modelo_listo": predictor._inicializado and predictor.modelo is not None
     }
 
-@app.post("/predecir", response_model=RespuestaPrediccion)
+@api_router.post("/predecir", response_model=RespuestaPrediccion)
 async def procesar_prediccion(datos: DatosPaciente):
     # Nota: Recibe los datos del formulario y devuelve la probabilidad de abandono calculada por el modelo.
     try:
@@ -45,7 +48,7 @@ async def procesar_prediccion(datos: DatosPaciente):
         # Nota: El error 500 indica que algo falló internamente en el servidor o en el modelo.
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-@app.get("/pacientes-en-riesgo", response_model=List[PacienteRiesgo])
+@api_router.get("/pacientes-en-riesgo", response_model=List[PacienteRiesgo])
 async def evaluar_pacientes_pendientes():
     # Nota: Procesa el CSV original y detecta los pacientes que requieren contacto urgente según el modelo.
     try:
@@ -65,7 +68,7 @@ async def evaluar_pacientes_pendientes():
         print(f"ERROR EN /pacientes-en-riesgo: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/estadisticas")
+@api_router.get("/estadisticas")
 async def obtener_estadisticas():
     # Nota: Agrupa y calcula los indicadores clave (KPIs) para mostrar en los gráficos del dashboard.
     try:
@@ -118,3 +121,5 @@ async def obtener_estadisticas():
     except Exception as e:
         print(f"ERROR EN /estadisticas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+app.include_router(api_router)
