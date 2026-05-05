@@ -3,6 +3,7 @@
 services:
   api:
     image: daemon1s/vetsur-api:latest
+    build: ./api
     ports: 
       - "8008:8008"
     mem_limit: 512m
