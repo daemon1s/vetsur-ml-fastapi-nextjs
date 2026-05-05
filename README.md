@@ -66,7 +66,7 @@ Se ha implementado un flujo automático para garantizar que el sistema sea fáci
 
 ## Arquitectura de despliegue y stack tecnológico
 <p align="center">
-  <img src="docs/vetsur.drawio.png" alt="Arquitectura del sistema" width="800">
+  <img src="docs/vetsur_drawio.png" alt="Arquitectura del sistema" width="800">
 </p>
 
 La plataforma funciona con una arquitectura de **servicios independientes**, e incluye una [sección de arquitectura interactiva](https://vetsur.daemonize.me/arquitectura) para explicar el flujo de datos.
@@ -82,15 +82,16 @@ La plataforma funciona con una arquitectura de **servicios independientes**, e i
 - **Infraestructura y DevOps:**
     - **Contenerización:** arquitectura orquestada con Docker y despliegue mediante Docker Hub.
     - **CI/CD:** flujos automatizados en GitHub Actions para compilación y despliegue atómico.
-    - **Servidor:** DigitalOcean Droplet protegido por un proxy inverso Nginx con cifrado SSL.
+    - **Servidor:** DigitalOcean Droplet gestionado de forma externa por **Nginx Proxy Manager** con cifrado SSL automático.
 
 ## Ejecución local
 
 ### Opción A: con Docker (Recomendado)
-Levante el ecosistema completo (Frontend, Backend y Nginx) con un solo comando:
+Levante los servicios de aplicación (Frontend y Backend) con un solo comando:
 ```bash
 docker-compose up -d --build
 ```
+> **Nota:** el ruteo y SSL se gestionan externamente mediante Nginx Proxy Manager.
 
 ### Opción B: desarrollo manual (sin Docker)
 Si prefiere ejecutar los servicios por separado para desarrollo:
