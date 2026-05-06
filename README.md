@@ -27,11 +27,11 @@ Vetsur enfrentaba un escenario crítico: a pesar de facturar aprox. $2.800 millo
 
 ## Vista de la plataforma
 <p align="center">
-  <img src="docs/vetsur_dashboard_final.png" alt="Dashboard Principal" width="900">
+  <img src="docs/vetsur_dashboard_v2.png" alt="Dashboard Principal" width="900">
   <br><br>
-  <img src="docs/dashboard_usuarios.png" alt="Gestión de Usuarios" width="900">
+  <img src="docs/vetsur_usuarios_v2.png" alt="Gestión de Usuarios" width="900">
   <br><br>
-  <img src="docs/vetsur_predictor_final.png" alt="Predictor de Riesgo" width="900">
+  <img src="docs/vetsur_predictor_v2.png" alt="Predictor de Riesgo" width="900">
 </p>
 
 ## Proceso de ingeniería de datos (ETL)
@@ -66,7 +66,7 @@ Se ha implementado un flujo automático para garantizar que el sistema sea fáci
 
 ## Arquitectura de despliegue y stack tecnológico
 <p align="center">
-  <img src="docs/vetsur_drawio.png" alt="Arquitectura del sistema" width="800">
+  <img src="docs/vetsur_despliegue.png" alt="Arquitectura del sistema" width="800">
 </p>
 
 La plataforma funciona con una arquitectura de **servicios independientes**, e incluye una [sección de arquitectura interactiva](https://vetsur.daemonize.me/arquitectura) para explicar el flujo de datos.

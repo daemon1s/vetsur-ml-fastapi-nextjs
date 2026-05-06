@@ -24,6 +24,11 @@ INSTRUCCIONES.MD
 INFORME_BUSINESS_INTELIGENCE_VETSUR.PDF
 INFORME_BUSINESS_INTELIGENCE_VETSUR.pdf
 
+# Enfoque
+enfoque/
+data/
+scripts/
+
 # OS junk
 .DS_Store
 Thumbs.db
