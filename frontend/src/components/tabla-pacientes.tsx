@@ -81,8 +81,9 @@ export function TablaPacientes() {
       `${(r.probabilidad_abandono * 100).toFixed(1)}%`,
       r.nivel_riesgo, `"${r.accion_sugerida}"`
     ])
-    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const csvContent = [headers, ...csvData].map(e => e.join(";")).join("\n")
+    const BOM = "\uFEFF"
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
