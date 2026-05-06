@@ -31,7 +31,7 @@ Vetsur enfrentaba un escenario crítico: a pesar de facturar aprox. $2.800 millo
   <br><br>
   <img src="docs/vetsur_usuarios_v2.png" alt="Gestión de Usuarios" width="900">
   <br><br>
-  <img src="docs/vetsur_predictor_v2.png" alt="Predictor de Riesgo" width="900">
+  <img src="docs/vetsur_predictor_v3.png" alt="Predictor de Riesgo" width="900">
 </p>
 
 ## Proceso de ingeniería de datos (ETL)
