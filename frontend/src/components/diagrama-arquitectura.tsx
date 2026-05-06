@@ -208,7 +208,7 @@ export function DiagramaArquitectura() {
   const nodes = useMemo(() => ({
     user: { x: TIERS.CLIENT.x, y: 350 },
     nginx: { x: TIERS.GATEWAY.x, y: 350 },
-    front: { x: TIERS.APP.x, y: 180 },
+    front: { x: TIERS.APP.x, y: 240 },
     back: { x: TIERS.APP.x, y: 520 },
     db: { x: TIERS.DATA.x, y: 220 },
     pkl: { x: TIERS.DATA.x, y: 420 },
@@ -259,8 +259,8 @@ export function DiagramaArquitectura() {
               </div>
             </foreignObject>
 
-            <rect x="260" y="80" width="940" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
-            <foreignObject x="280" y="95" width="400" height="50">
+            <rect x="580" y="80" width="620" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
+            <foreignObject x="600" y="95" width="400" height="50">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#38bdf8]/10 border border-[#38bdf8]/20 shadow-2xl">
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#38bdf8]" style={{ filter: 'drop-shadow(0 0 5px rgba(56,189,248,0.8))' }}>
@@ -278,8 +278,9 @@ export function DiagramaArquitectura() {
           </g>
 
           <Connection start={nodes.user} end={nodes.nginx} label="Petición HTTPS" color={TIERS.CLIENT.color} reqBegins={[0, 10]} resBegins={[9, 19]} cycle={20} />
-          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Inverso" color={TIERS.GATEWAY.color} reqBegins={[1, 11]} resBegins={[8, 18]} cycle={20} />
-          <Connection start={nodes.front} end={nodes.back} label="Fetch API (JSON)" color={TIERS.APP.color} reqBegins={[2, 12]} resBegins={[7, 17]} cycle={20} isDashed={true} />
+          <Connection start={nodes.nginx} end={nodes.front} label="Proxy Inverso" color={TIERS.GATEWAY.color} reqBegins={[1.0, 11.0]} resBegins={[8.0, 18.0]} cycle={20} />
+          <Connection start={nodes.nginx} end={nodes.back} label="API Proxy (/api)" color={TIERS.GATEWAY.color} reqBegins={[1.0, 11.0]} resBegins={[8.0, 18.0]} cycle={20} />
+          <Connection start={nodes.front} end={nodes.back} label="Fetch API (JSON)" color={TIERS.APP.color} reqBegins={[2.0, 12.0]} resBegins={[7.0, 17.0]} cycle={20} isDashed={true} />
 
           <Connection start={nodes.back} end={nodes.model} label="Inferencia IA" color={TIERS.APP.color} reqBegins={[3]} resBegins={[6]} cycle={20} />
           <Connection start={nodes.model} end={nodes.pkl} label="Carga .PKL" color={TIERS.DATA.color} reqBegins={[4]} resBegins={[5]} cycle={20} labelYOffset={35} />
@@ -296,7 +297,7 @@ export function DiagramaArquitectura() {
 
           <Node
             {...nodes.nginx} color={TIERS.GATEWAY.color} port="80/443"
-            icon={Server} title="nginx" subtitle="Proxy Inverso"
+            icon={Server} title="nginx proxy manager" subtitle="Proxy Inverso"
             description="El director de tráfico del servidor. Recibe todas las visitas y las reparte de forma inteligente entre la web y los servicios de datos de la API."
             techStack={["OpenSSL"]}
             logo={
