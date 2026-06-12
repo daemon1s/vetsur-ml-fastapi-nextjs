@@ -1,5 +1,3 @@
-# Nota: Docker Compose se encarga de "orquestar" todos los componentes. 
-# Ahora descarga las imágenes pre-construidas desde Docker Hub.
 services:
   api:
     image: daemon1s/vetsur-api:latest
@@ -34,3 +32,8 @@ services:
       - api
       - frontend
     restart: always
+
+networks:
+  default:
+    name: proxy-network
+    external: true
