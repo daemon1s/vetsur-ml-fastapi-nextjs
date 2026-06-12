@@ -33,14 +33,13 @@ export default function Dashboard() {
 
 
 
-      {/* Navbar Superior Fijo */}
       <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-6 lg:px-10">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img 
-              src="/logo_vetsur.png" 
-              alt="VetSur Logo" 
-              className="h-8 w-auto object-contain" 
+            <img
+              src="/logo_vetsur.png"
+              alt="VetSur Logo"
+              className="h-8 w-auto object-contain"
             />
             <span className="font-black text-xl tracking-tighter">
               VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span>
@@ -70,7 +69,6 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto w-full space-y-12 p-6 lg:p-8 relative z-10">
 
-        {/* KPI Cards Glassmorphic - Con isolation para evitar sangrado de hover */}
         <div className="grid gap-8 md:grid-cols-2 [isolation:isolate] relative z-10">
           <TarjetaKpiML
             metricaPrincipal={{
@@ -80,7 +78,7 @@ export default function Dashboard() {
               highlight: true
             }}
             metricaSecundaria={{
-              label: "Días sin Visita",
+              label: "Días sin visita",
               valor: `${stats?.kpis?.promedio_dias_riesgo ?? "—"} días`,
               subtexto: "promedio histórico"
             }}
@@ -90,7 +88,7 @@ export default function Dashboard() {
 
           <TarjetaKpiML
             metricaPrincipal={{
-              label: "Tasa de Retención",
+              label: "Tasa de retención",
               valor: stats?.kpis?.tasa_retencion ?? "—",
               subtexto: `analizando ${stats?.kpis?.total_pacientes ?? "—"} casos`,
               highlight: true
@@ -105,13 +103,11 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Gráficos Glassmorphic - Z-20 para estar por encima de cualquier sangrado inferior */}
         <div className="grid gap-8 md:grid-cols-2 relative z-20">
           <GraficoSucursales data={stats?.sucursales} />
           <GraficoEspecies data={stats?.especies} />
         </div>
 
-        {/* Tabla CRM Glassmorphic */}
         <div className="bg-[#0A0B10] border border-white/10 rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in-up relative overflow-hidden" style={{ animationDelay: "180ms" }}>
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.01] to-transparent pointer-events-none" />

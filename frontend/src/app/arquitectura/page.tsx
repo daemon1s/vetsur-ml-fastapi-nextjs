@@ -8,14 +8,13 @@ export default function ArquitecturaPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg text-white relative overflow-x-hidden">
 
-      {/* Header Unificado */}
       <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-6 lg:px-10">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img 
-              src="/logo_vetsur.png" 
-              alt="VetSur Logo" 
-              className="h-8 w-auto object-contain" 
+            <img
+              src="/logo_vetsur.png"
+              alt="VetSur Logo"
+              className="h-8 w-auto object-contain"
             />
             <span className="font-black text-xl tracking-tighter">
               VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span>

@@ -19,10 +19,8 @@ export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono
     <div 
       className="relative overflow-hidden bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:border-white/20 group animate-in-up"
     >
-      {/* Sheen reflectivo premium en hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
-      {/* Borde superior de luz sutil */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       
       <div className="relative z-10 space-y-8">

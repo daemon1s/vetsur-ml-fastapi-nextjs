@@ -261,7 +261,6 @@ export function TablaPacientes() {
 
           <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Sucursal</span>
-            {/* El filtro de sucursal permite segmentar los datos por ubicación geográfica para mejorar la precisión del reporte */}
             <select
               value={activeSucursal}
               onChange={(e) => {
