@@ -82,10 +82,12 @@ function PredictorPageContent() {
     <div className="flex min-h-screen w-full flex-col bg-[#0A0A0F] pattern-bg text-white relative overflow-x-hidden">
       <header className="sticky top-0 z-50 flex h-16 items-center border-b border-white/5 bg-[#0D0D12]/60 backdrop-blur-2xl px-4 lg:px-8">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[#1D9E75] to-[#25C08F] shadow-[0_0_20px_rgba(29,158,117,0.3)] group-hover:scale-110 transition-transform">
-              <Activity className="h-5 w-5 text-white" />
-            </div>
+          <Link href="/" className="flex items-center gap-3">
+            <img 
+              src="/logo_vetsur.png" 
+              alt="VetSur Logo" 
+              className="h-8 w-auto object-contain" 
+            />
             <span className="font-black text-xl tracking-tighter">VetSur <span className="text-[#1D9E75] opacity-50 font-medium">ML</span></span>
           </Link>
           <div className="flex items-center gap-8">
