@@ -2,12 +2,12 @@
 
 <div align="center">
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-05998b?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Docker](https://img.shields.io/badge/Docker-Dockerized-2496ed?style=for-the-badge&logo=docker)](https://www.docker.com/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-RF%2086%25-f7931e?style=for-the-badge&logo=scikit-learn)](https://scikit-learn.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI/CD-2088FF?style=for-the-badge&logo=github-actions)](https://github.com/features/actions)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-05998b?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Dockerized-2496ed?style=flat&logo=docker)](https://www.docker.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-RF%2086%25-f7931e?style=flat&logo=scikit-learn)](https://scikit-learn.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI/CD-2088FF?style=flat&logo=github-actions)](https://github.com/features/actions)
 
 ### 🚀 [Acceder a la plataforma en vivo](https://vetsur.daemonize.me)
 
@@ -65,8 +65,9 @@ Se ha implementado un flujo automático para garantizar que el sistema sea fáci
 - **Despliegue atómico:** el VPS descarga las imágenes nuevas y reinicia los contenedores solo si la compilación fue exitosa.
 
 ## Arquitectura de despliegue y stack tecnológico
+
 <p align="center">
-  <img src="docs/vetsur_despliegue.png" alt="Arquitectura del sistema" width="800">
+  <img src="docs/desplieguevetsur.png" alt="Arquitectura del sistema" width="800">
 </p>
 
 La plataforma funciona con una arquitectura de **servicios independientes**, e incluye una [sección de arquitectura interactiva](https://vetsur.daemonize.me/arquitectura) para explicar el flujo de datos.
@@ -82,7 +83,7 @@ La plataforma funciona con una arquitectura de **servicios independientes**, e i
 - **Infraestructura y DevOps:**
     - **Contenerización:** arquitectura orquestada con Docker y despliegue mediante Docker Hub.
     - **CI/CD:** flujos automatizados en GitHub Actions para compilación y despliegue atómico.
-    - **Servidor:** DigitalOcean Droplet gestionado de forma externa por **Nginx Proxy Manager** con cifrado SSL automático.
+    - **Servidor:** Servidor VPS Linux gestionado de forma interna por **Nginx Proxy Manager** con cifrado SSL automático.
 
 ## Ejecución local
 

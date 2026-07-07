@@ -254,13 +254,13 @@ export function DiagramaArquitectura() {
                   className="font-black tracking-[0.2em] text-[13px] text-white uppercase"
                   style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}
                 >
-                  Servidor VPS (DigitalOcean)
+                  Servidor VPS (Linux)
                 </span>
               </div>
             </foreignObject>
 
-            <rect x="580" y="80" width="620" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
-            <foreignObject x="600" y="95" width="400" height="50">
+            <rect x="300" y="80" width="900" height="640" rx="24" fill="rgba(56,189,248,0.01)" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.3" />
+            <foreignObject x="320" y="95" width="400" height="50">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#38bdf8]/10 border border-[#38bdf8]/20 shadow-2xl">
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#38bdf8]" style={{ filter: 'drop-shadow(0 0 5px rgba(56,189,248,0.8))' }}>
@@ -271,7 +271,7 @@ export function DiagramaArquitectura() {
                   className="font-black tracking-[0.2em] text-[11px] text-[#38bdf8] uppercase"
                   style={{ filter: 'drop-shadow(0 0 10px rgba(56,189,248,0.5))' }}
                 >
-                  Red dockerizada
+                  Red dockerizada (proxy-network)
                 </span>
               </div>
             </foreignObject>
