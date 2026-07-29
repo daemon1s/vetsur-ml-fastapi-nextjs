@@ -40,14 +40,18 @@ class ModeloVetSur:
 
     def inicializar(self) -> None:
         # Nota: Carga los archivos del modelo y la lista de columnas exportadas desde el notebook.
+        if not os.path.exists(self.ruta_modelo):
+            raise FileNotFoundError(f"No se encontro el archivo del modelo en: {self.ruta_modelo}")
+        if not os.path.exists(self.ruta_columnas):
+            raise FileNotFoundError(f"No se encontro el archivo de columnas en: {self.ruta_columnas}")
+        
         try:
-            if os.path.exists(self.ruta_modelo):
-                self.modelo = joblib.load(self.ruta_modelo)
-            if os.path.exists(self.ruta_columnas):
-                with open(self.ruta_columnas, "r") as f:
-                    self.columnas_esperadas = json.load(f)
+            self.modelo = joblib.load(self.ruta_modelo)
+            with open(self.ruta_columnas, "r") as f:
+                self.columnas_esperadas = json.load(f)
         except Exception as e:
             logger.error(f"Error cargando modelo: {e}")
+            raise e
 
     def _limpiar_texto(self, texto: str) -> str:
         # Nota: Esta función normaliza el texto para que coincida con las columnas del modelo.
@@ -97,7 +101,7 @@ class ModeloVetSur:
             # Cálculo de probabilidad de abandono (Clase 0)
             prob = self.modelo.predict_proba(df_input)[0][0]
         else:
-            prob = 0.5
+            raise RuntimeError("El modelo Random Forest no ha sido inicializado correctamente.")
             
         riesgo, accion = self._evaluar_riesgo(prob)
         return {
@@ -155,7 +159,7 @@ class ModeloVetSur:
         if self.modelo:
             probs = self.modelo.predict_proba(df_input)[:, 0]
         else:
-            probs = [0.5] * len(df_input)
+            raise RuntimeError("El modelo Random Forest no ha sido inicializado correctamente.")
 
         res = []
         for i, (idx, row) in enumerate(data.iterrows()):

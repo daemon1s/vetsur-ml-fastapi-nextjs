@@ -54,7 +54,7 @@ async def evaluar_pacientes_pendientes():
     try:
         ruta_csv = "caso1_vetsur.csv"
         if not os.path.exists(ruta_csv):
-            return []
+            raise HTTPException(status_code=404, detail="Archivo CSV (caso1_vetsur.csv) no encontrado en el servidor.")
             
         df = pd.read_csv(ruta_csv, encoding='latin1')
         df_riesgo = predictor.predecir_lote(df, limit=None)
