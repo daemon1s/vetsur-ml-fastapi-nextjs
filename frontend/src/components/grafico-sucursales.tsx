@@ -59,7 +59,7 @@ const RenderCustomLegend = (props: any) => {
 }
 
 export function GraficoSucursales({ data: propsData }: { data?: any[] }) {
-  const chartData = propsData || fallback
+  const chartData = propsData || []
   return (
     <div className="bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-2xl transition-all hover:border-white/20 group overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
