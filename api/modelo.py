@@ -33,7 +33,14 @@ class ModeloVetSur:
         self.modelo = None
         self.columnas_esperadas = []
         self.MEDIANA_MONTO = 42100.0
-        self.MEDIANA_COSTO = 9500.0
+        self.MEDIANA_COSTO_POR_ATENCION = {
+            'cirugia': 54350.0,
+            'consulta_especialidad': 13950.0,
+            'consulta_general': 6700.0,
+            'hospitalizacion': 32100.0,
+            'venta_producto': 5200.0,
+        }
+        self.MEDIANA_COSTO_GLOBAL = 9500.0
         self.resultados_cache = None
         self.inicializar()
         self._inicializado = True
@@ -76,7 +83,7 @@ class ModeloVetSur:
         df_input = pd.DataFrame([0] * len(self.columnas_esperadas), index=self.columnas_esperadas).T
         
         monto = datos.monto_cobrado if datos.monto_cobrado > 0 else self.MEDIANA_MONTO
-        costo = datos.costo_medicamento if datos.costo_medicamento > 0 else self.MEDIANA_COSTO
+        costo = datos.costo_medicamento if datos.costo_medicamento > 0 else self.MEDIANA_COSTO_POR_ATENCION.get(self._limpiar_texto(datos.tipo_atencion), self.MEDIANA_COSTO_GLOBAL)
         
         mapping = {
             f"especie_{self._limpiar_texto(datos.especie)}": 1,
@@ -128,7 +135,11 @@ class ModeloVetSur:
         mediana_costo = float(data['costo_medicamento'].median()) if 'costo_medicamento' in data.columns else 0
         
         df_clean = data.copy()
-        df_clean['costo_medicamento'] = df_clean['costo_medicamento'].fillna(mediana_costo).fillna(0)
+        if 'tipo_atencion' in df_clean.columns and 'costo_medicamento' in df_clean.columns:
+            mediana_segmentada = df_clean.groupby('tipo_atencion')['costo_medicamento'].transform('median')
+            df_clean['costo_medicamento'] = df_clean['costo_medicamento'].fillna(mediana_segmentada).fillna(mediana_costo)
+        else:
+            df_clean['costo_medicamento'] = df_clean['costo_medicamento'].fillna(mediana_costo).fillna(0)
         
         # Limpieza para el modelo
         df_prep = pd.DataFrame(index=df_clean.index)

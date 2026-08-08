@@ -38,7 +38,7 @@ Vetsur enfrentaba un escenario crítico: a pesar de facturar aprox. $2.800 millo
 En lugar de la eliminación de registros, se optó por reconstruir la lógica de los datos en el pipeline:
 - **Normalización automatizada:** implementación de la librería `ftfy` para reparar la doble decodificación corrupta en variables categóricas.
 - **Codificación categórica:** aplicación de **One-Hot Encoding** para transformar variables como especie, sucursal y tipo de atención en vectores numéricos procesables por el modelo.
-- **Imputación estadística:** uso de la **mediana** como medida robusta frente a los valores atípicos encontrados en cirugías de alto costo.
+- **Imputación estadística:** uso de la **mediana segmentada por tipo de atención** como medida robusta frente a los valores atípicos encontrados en cirugías de alto costo, con la mediana global como respaldo.
 
 ## Modelado de datos (BI)
 Se evolucionó de un esquema estrella a un **esquema de galaxia**, separando los hechos de atención de los movimientos de inventario:
