@@ -1,6 +1,6 @@
 services:
   api:
-    image: daemon1s/vetsur-api:latest
+    image: ghcr.io/daemon1s/vetsur-api:latest
     build: ./api
     ports:
       - "8008:8008"
@@ -14,7 +14,7 @@ services:
     env_file: .env
 
   frontend:
-    image: daemon1s/vetsur-frontend:latest
+    image: ghcr.io/daemon1s/vetsur-frontend:latest
     ports:
       - "3000:3000"
     mem_limit: 512m
