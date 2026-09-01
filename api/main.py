@@ -9,11 +9,9 @@ from esquemas import DatosPaciente, RespuestaPrediccion, PacienteRiesgo
 from modelo import ModeloVetSur
 from evaluacion import evaluar_modelo_cacheado
 
-# Nota: Instanciamos el predictor globalmente para que sea accesible desde todos los endpoints.
 predictor = ModeloVetSur(ruta_modelo="modelo_vetsur.pkl", ruta_columnas="columnas_vetsur.json")
 
 async def lifespan(app: FastAPI):
-    # Nota: Inicializamos el predictor y pre-calculamos el lote con caso1_vetsur.csv para responder al instante.
     predictor.inicializar()
     ruta_csv = "caso1_vetsur.csv"
     if os.path.exists(ruta_csv):
@@ -26,7 +24,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="VetSur API", version="1.0.0", lifespan=lifespan)
 
-# Nota: Configuramos CORS para permitir que el frontend (Next.js) pueda consultar la API sin bloqueos de seguridad.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,12 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Router principal compatible tanto con /api como con la raíz
 api_router = APIRouter()
 
 @api_router.get("/salud")
 async def health_check():
-    # Nota: Endpoint simple para verificar que la API y el modelo están operativos.
     return {
         "status": "operativo", 
         "modelo_listo": predictor._inicializado and predictor.modelo is not None
@@ -48,12 +43,10 @@ async def health_check():
 
 @api_router.post("/predecir", response_model=RespuestaPrediccion)
 async def procesar_prediccion(datos: DatosPaciente):
-    # Nota: Recibe los datos del formulario y devuelve la probabilidad de abandono calculada por el modelo.
     try:
         resultado = predictor.predecir_uno(datos)
         return RespuestaPrediccion(**resultado)
     except Exception as e:
-        # Nota: El error 500 indica que algo falló internamente en el servidor o en el modelo.
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 @api_router.get("/evaluar-modelo")
@@ -66,7 +59,6 @@ async def evaluar_modelo():
 
 @api_router.get("/pacientes-en-riesgo", response_model=List[PacienteRiesgo])
 async def evaluar_pacientes_pendientes():
-    # Nota: Procesa el CSV original ordenado secuencialmente por ID (PAC_00001, PAC_00002, ...)
     try:
         ruta_csv = "caso1_vetsur.csv"
         if not os.path.exists(ruta_csv):
@@ -86,7 +78,6 @@ async def evaluar_pacientes_pendientes():
 
 @api_router.get("/estadisticas")
 async def obtener_estadisticas():
-    # Nota: Agrupa y calcula los indicadores clave (KPIs) para mostrar en los gráficos del dashboard gobernados por el PKL.
     try:
         ruta_csv = "caso1_vetsur.csv"
         if not os.path.exists(ruta_csv):
@@ -126,7 +117,6 @@ async def obtener_estadisticas():
                 "pacientes": int(row['Alto'] + row['Medio'] + row['Bajo'])
             })
 
-        # Métricas de vacunas calculadas sobre el dataset real y el PKL
         vacunas_al_dia = df_resultados[df_resultados['tiene_vacunas_al_dia'] == True]
         vacunas_vencidas = df_resultados[df_resultados['tiene_vacunas_al_dia'] == False]
         

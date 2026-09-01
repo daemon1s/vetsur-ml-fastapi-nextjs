@@ -17,8 +17,8 @@ const MARGIN_RIGHT = 20
 const MARGIN_TOP = 22
 const MARGIN_BOTTOM = 46
 
-const PLOT_W = VIEW_W - MARGIN_LEFT - MARGIN_RIGHT // 392
-const PLOT_H = VIEW_H - MARGIN_TOP - MARGIN_BOTTOM // 202
+const PLOT_W = VIEW_W - MARGIN_LEFT - MARGIN_RIGHT
+const PLOT_H = VIEW_H - MARGIN_TOP - MARGIN_BOTTOM
 
 const TICKS = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
@@ -31,10 +31,8 @@ export function GraficoCurvaRoc({
   const gradientId = useId()
   const glowFilterId = useId()
 
-  // Asegurar puntos ordenados y delimitados
   const puntosOrdenados = [...curva].sort((a, b) => a.fpr - b.fpr)
 
-  // Coordenadas del trazado
   const puntosSvg = puntosOrdenados.map((p) => {
     const x = MARGIN_LEFT + p.fpr * PLOT_W
     const y = MARGIN_TOP + (1 - p.tpr) * PLOT_H
@@ -43,7 +41,6 @@ export function GraficoCurvaRoc({
 
   const puntosString = puntosSvg.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
 
-  // Polígono de área bajo la curva (AUC)
   const primerPunto = puntosSvg[0] || { x: MARGIN_LEFT, y: MARGIN_TOP + PLOT_H }
   const ultimoPunto = puntosSvg[puntosSvg.length - 1] || {
     x: MARGIN_LEFT + PLOT_W,

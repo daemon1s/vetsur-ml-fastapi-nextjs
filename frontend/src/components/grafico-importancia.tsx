@@ -78,7 +78,6 @@ function formatearInfo(feature: string) {
   if (DICCIONARIO_FEATURES[normalizado]) {
     return DICCIONARIO_FEATURES[normalizado]
   }
-  // Fallback formateando strings tipo nombre_variable
   const legible = feature
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase())
