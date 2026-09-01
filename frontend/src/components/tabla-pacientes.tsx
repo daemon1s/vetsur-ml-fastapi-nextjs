@@ -1,5 +1,6 @@
 "use client"
-import React, { useState, useEffect } from "react"
+
+import React, { useState, useEffect, useCallback } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -9,171 +10,314 @@ import {
   getPaginationRowModel,
   getFilteredRowModel,
   ColumnFiltersState,
+  type Row,
 } from "@tanstack/react-table"
 import { apiObj } from "@/lib/api"
 import type { PacienteRiesgo } from "@/types/vetsur"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Download, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Download, Search, ChevronLeft, ChevronRight, MessageSquare, ArrowUpDown, ArrowUp, ArrowDown, Mail, Copy, Check } from "lucide-react"
+import { ErrorPanel } from "@/components/estados"
+
+const normalizarSucursal = (s: string) => {
+  const clean = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/_/g, " ").trim()
+  const map: Record<string, string> = {
+    nunoa: "Ñuñoa",
+    penalolen: "Peñalolén",
+    maipu: "Maipú",
+    "las condes": "Las Condes",
+    "la florida": "La Florida",
+    providencia: "Providencia",
+    pudahuel: "Pudahuel",
+    "san miguel": "San Miguel",
+  }
+  return map[clean] || s
+}
+
+const normalizarEspecie = (s: string) => {
+  const clean = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()
+  const map: Record<string, string> = {
+    perro: "Perro",
+    gato: "Gato",
+    exotico: "Exótico",
+    ave: "Ave",
+  }
+  return map[clean] || s
+}
+
+type FilaPaciente = Row<PacienteRiesgo>
 
 export function TablaPacientes() {
   const [data, setData] = useState<PacienteRiesgo[]>([])
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [copiadoId, setCopiadoId] = useState<string | null>(null)
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "paciente_id", desc: false }
+  ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState("")
-
-  const [activeEspecie, setActiveEspecie] = useState("Todos")
   const [activeRiesgo, setActiveRiesgo] = useState("Todos")
   const [activeSucursal, setActiveSucursal] = useState("Todas")
 
-  // Nota: Esta función normaliza el texto para que la búsqueda sea "inteligente" (ignora tildes).
-  const normalize = (s: string) =>
-    s.toLowerCase()
+  const normalizarBusqueda = (s: string) =>
+    s
+      .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/ñ/g, "n")
 
-  const displaySucursal = (s: string) => {
-    const map: Record<string, string> = {
-      "la florida": "La Florida",
-      "las condes": "Las Condes",
-      "maipu": "Maipú",
-      "nunoa": "Ñuñoa",
-      "penalolen": "Peñalolén",
-      "providencia": "Providencia",
-      "pudahuel": "Pudahuel",
-      "san miguel": "San Miguel"
-    }
-    return map[s.toLowerCase()] || s
-  }
-
-  const displayEspecie = (s: string) => {
-    const map: Record<string, string> = {
-      "exotico": "Exótico",
-      "perro": "Perro",
-      "gato": "Gato",
-      "ave": "Ave"
-    }
-    return map[s.toLowerCase()] || s
-  }
-
-  useEffect(() => {
-    apiObj.obtenerPacientesEnRiesgo()
-      .then(res => setData(res))
-      .catch(e => console.error("Error en tabla:", e))
+  const cargarDatos = useCallback(() => {
+    setLoading(true)
+    setError(false)
+    apiObj
+      .obtenerPacientesEnRiesgo()
+      .then((res) => {
+        if (res) {
+          setData(res)
+        }
+      })
+      .catch(() => {
+        setError(true)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
-  const colorBadge = (riesgo: string) => {
-    switch (riesgo) {
-      case "Alto": return "bg-red-500/10 text-red-400 border border-red-500/20"
-      case "Medio": return "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-      default: return "bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20"
-    }
-  }
+  useEffect(() => {
+    cargarDatos()
+  }, [cargarDatos])
 
   const exportarCSV = () => {
-    const rows = table.getFilteredRowModel().rows.map(r => r.original)
+    const rows = table.getFilteredRowModel().rows.map((r) => r.original)
     if (rows.length === 0) return
-    const headers = ["ID Paciente", "Especie", "Sucursal", "Días s/visita", "Riesgo %", "Nivel", "Acción CRM"]
-    const csvData = rows.map(r => [
-      r.paciente_id, r.especie, r.sucursal,
+    const headers = [
+      "ID Paciente",
+      "Especie",
+      "Sucursal",
+      "Días inactivo",
+      "Vacunas al día",
+      "Probabilidad de abandono",
+      "Nivel de riesgo",
+      "Acción sugerida",
+    ]
+    const csvData = rows.map((r) => [
+      r.paciente_id,
+      normalizarEspecie(r.especie),
+      normalizarSucursal(r.sucursal),
       r.dias_desde_ultima_visita,
+      r.tiene_vacunas_al_dia ? "Al día" : "Vencidas",
       `${(r.probabilidad_abandono * 100).toFixed(1)}%`,
-      r.nivel_riesgo, `"${r.accion_sugerida}"`
+      r.nivel_riesgo,
+      `"${r.accion_sugerida.replace(/"/g, '""')}"`,
     ])
-    const csvContent = [headers, ...csvData].map(e => e.join(";")).join("\n")
+    const csvContent = [headers, ...csvData].map((e) => e.join(";")).join("\n")
     const BOM = "\uFEFF"
     const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.setAttribute("download", "reporte_riesgo_vetsur.csv")
+    link.setAttribute("download", `censo_vetsur_${new Date().toISOString().slice(0, 10)}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
 
+  const copiarGuion = (id: string, guion: string) => {
+    navigator.clipboard.writeText(guion)
+    setCopiadoId(id)
+    setTimeout(() => setCopiadoId(null), 2000)
+  }
+
   const columns = [
     {
       accessorKey: "paciente_id",
-      header: "Paciente",
-      cell: ({ row }: any) => <span className="font-bold text-white/80 tracking-tight">#{row.getValue("paciente_id")}</span>
+      header: "ID Paciente",
+      cell: ({ row }: { row: FilaPaciente }) => (
+        <span className="font-mono font-bold text-white tracking-tight">
+          #{row.original.paciente_id}
+        </span>
+      ),
     },
-    { 
-      accessorKey: "especie", 
+    {
+      accessorKey: "especie",
       header: "Especie",
-      cell: ({ row }: any) => displayEspecie(row.getValue("especie"))
+      cell: ({ row }: { row: FilaPaciente }) => (
+        <span className="font-medium text-slate-200">
+          {normalizarEspecie(row.original.especie)}
+        </span>
+      ),
     },
     {
       accessorKey: "sucursal",
       header: "Sucursal",
-      cell: ({ row }: any) => displaySucursal(row.getValue("sucursal"))
+      cell: ({ row }: { row: FilaPaciente }) => (
+        <span className="text-slate-300 font-medium">
+          {normalizarSucursal(row.original.sucursal)}
+        </span>
+      ),
     },
     {
       accessorKey: "dias_desde_ultima_visita",
-      header: "Días sin Visita",
-      cell: ({ row }: any) => <span className="font-bold text-white/90 tracking-tight">{row.getValue("dias_desde_ultima_visita")}d</span>
+      header: "Inactividad",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const dias = Number(row.original.dias_desde_ultima_visita)
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono font-semibold text-slate-200">{dias} días</span>
+            {dias > 90 && (
+              <span
+                className="h-2 w-2 rounded-full bg-rose-500 flex-shrink-0"
+                title="Inactividad mayor a 90 días"
+              />
+            )}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "tiene_vacunas_al_dia",
+      header: "Vacunas",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const alDia = row.original.tiene_vacunas_al_dia
+        return (
+          <Badge
+            className={`text-[11px] font-semibold ${
+              alDia
+                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                : "bg-rose-500/15 text-rose-400 border-rose-500/30"
+            }`}
+          >
+            {alDia ? "Al día" : "Vencidas"}
+          </Badge>
+        )
+      },
     },
     {
       accessorKey: "probabilidad_abandono",
-      header: "Riesgo de Abandono",
-      cell: ({ row }: any) => {
-        const val = row.getValue("probabilidad_abandono") as number
+      header: "Probabilidad de abandono",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const val = Number(row.original.probabilidad_abandono)
+        const pct = (val * 100).toFixed(1)
+        const isHigh = val >= 0.65
+        const isMed = val >= 0.30 && val < 0.65
+
+        const barColor = isHigh ? "bg-[#e74c3c]" : isMed ? "bg-[#f39c12]" : "bg-[#16a085]"
+        const textColor = isHigh ? "text-rose-400" : isMed ? "text-amber-400" : "text-emerald-400"
+
         return (
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden w-12 hidden sm:block">
+          <div className="flex items-center gap-2.5 min-w-[140px]">
+            <div className="w-20 h-2 bg-slate-900 rounded-full overflow-hidden flex-shrink-0 border border-slate-800">
               <div
-                className="h-full bg-[#1D9E75]"
-                style={{ width: `${val * 100}%`, backgroundColor: val > 0.7 ? '#E24B4A' : '#1D9E75' }}
+                className={`h-full rounded-full ${barColor}`}
+                style={{ width: `${Math.min(100, Math.max(5, val * 100))}%` }}
               />
             </div>
-            <span className="font-bold text-white tabular-nums text-sm">{(val * 100).toFixed(1)}%</span>
+            <span className={`font-mono text-xs font-bold ${textColor}`}>
+              {pct}%
+            </span>
           </div>
         )
-      }
+      },
     },
     {
       accessorKey: "nivel_riesgo",
-      header: "Nivel de Riesgo",
-      cell: ({ row }: any) => {
-        const risk = row.getValue("nivel_riesgo") as string
-        return <Badge className={`${colorBadge(risk)} text-[9px] font-bold uppercase tracking-widest px-3`}>{risk}</Badge>
-      }
+      header: "Nivel de riesgo",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const val = Number(row.original.probabilidad_abandono)
+        const risk = val >= 0.65 ? "Alto" : val >= 0.30 ? "Medio" : "Bajo"
+
+        if (risk === "Alto") {
+          return (
+            <Badge className="bg-rose-500/15 text-rose-400 border-rose-500/30 text-[11px] font-bold">
+              Alto
+            </Badge>
+          )
+        }
+        if (risk === "Medio") {
+          return (
+            <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-[11px] font-bold">
+              Medio
+            </Badge>
+          )
+        }
+        return (
+          <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[11px] font-bold">
+            Bajo
+          </Badge>
+        )
+      },
     },
     {
-      id: "acciones",
-      header: "Acción CRM",
-      cell: ({ row }: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 rounded-lg bg-[#1D9E75]/10 hover:bg-[#1D9E75]/20 text-[#1D9E75] border border-[#1D9E75]/20"
-            title="Contactar por WhatsApp"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
-              <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
-            </svg>
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10"
-            title="Llamar al cliente"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
-            </svg>
-          </Button>
-        </div>
-      )
+      accessorKey: "accion_sugerida",
+      header: "Acción sugerida",
+      cell: ({ row }: { row: FilaPaciente }) => (
+        <span className="relative inline-block max-w-[300px]">
+          <span className="block cursor-help truncate text-xs text-slate-300 underline decoration-dotted decoration-slate-600 underline-offset-4">
+            {row.original.accion_sugerida}
+          </span>
+          <span className="pointer-events-none absolute left-0 top-full z-50 mt-1.5 hidden w-80 rounded-lg border border-slate-700 bg-[#101b2d] p-3 text-[11px] leading-relaxed text-slate-300 shadow-xl group-hover/accion:block">
+            {row.original.accion_sugerida}
+          </span>
+        </span>
+      ),
+    },
+    {
+      id: "contacto",
+      header: () => <span className="text-right block">Acciones</span>,
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const paciente = row.original
+        const sucursalFormateada = normalizarSucursal(paciente.sucursal)
+        const guion = `Hola, le escribimos de la Clínica VetSur ${sucursalFormateada} para coordinar el control preventivo de su mascota (#${paciente.paciente_id}). ${paciente.accion_sugerida}`
+        const mensaje = encodeURIComponent(guion)
+        const whatsappUrl = `https://wa.me/?text=${mensaje}`
+        const emailUrl = `mailto:?subject=${encodeURIComponent(`Control preventivo · VetSur ${sucursalFormateada}`)}&body=${mensaje}`
+        const copiado = copiadoId === paciente.paciente_id
+
+        return (
+          <div className="flex justify-end gap-1.5">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Enviar por WhatsApp"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition-colors hover:bg-emerald-500/25"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={emailUrl}
+              title="Enviar por email"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
+            >
+              <Mail className="h-3.5 w-3.5" />
+            </a>
+            <button
+              type="button"
+              onClick={() => copiarGuion(paciente.paciente_id, guion)}
+              title={copiado ? "Guion copiado" : "Copiar guion de contacto"}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
+            >
+              {copiado ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        )
+      },
     },
   ]
 
   const table = useReactTable({
-    data, columns,
+    data,
+    columns,
     state: { sorting, columnFilters, globalFilter },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -185,153 +329,196 @@ export function TablaPacientes() {
     globalFilterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)
       if (!value) return false
-      return normalize(String(value)).includes(normalize(filterValue))
+      return normalizarBusqueda(String(value)).includes(normalizarBusqueda(filterValue))
     },
-    initialState: { pagination: { pageSize: 12 } }
+    initialState: { pagination: { pageSize: 8 } },
   })
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 group-focus-within:text-[#1D9E75] transition-colors" />
-            <input
-              placeholder="Buscar por ID o Sucursal..."
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+        <div>
+          <h3 className="text-base font-bold text-white tracking-tight">
+            Censo de pacientes y riesgo de abandono
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Priorización de llamadas y campañas según el riesgo de abandono
+          </p>
+        </div>
+
+        <div className="flex w-full md:w-auto flex-wrap items-center gap-2.5">
+          <div className="relative w-full sm:w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+            <Input
+              placeholder="Buscar por ID o sucursal..."
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              className="w-full h-11 pl-12 pr-4 bg-white/5 border border-white/5 focus:border-[#1D9E75]/30 focus:ring-1 focus:ring-[#1D9E75]/10 rounded-2xl text-sm font-medium text-white transition-all outline-none"
+              className="h-9 pl-9 text-xs bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500 focus-visible:ring-[#16a085]"
             />
           </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Button
-              onClick={exportarCSV}
-              className="flex-1 md:flex-none h-11 bg-[#1D9E75]/5 border border-[#1D9E75]/20 hover:bg-[#1D9E75]/10 hover:border-[#1D9E75]/40 text-white flex gap-2.5 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all shadow-[0_0_20px_rgba(29,158,117,0.05)] hover:shadow-[0_0_25px_rgba(29,158,117,0.2)]"
-            >
-              <Download className="h-4 w-4 text-[#1D9E75]" />
-              Exportar excel
-            </Button>
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="size-2 rounded-full bg-[#1D9E75] animate-pulse shadow-[0_0_10px_rgba(29,158,117,1)]" />
-            <span className="text-xs font-bold text-white tracking-tight">
-              {table.getFilteredRowModel().rows.length} <span className="text-white/40 font-medium uppercase text-[10px] tracking-widest ml-1">Pacientes encontrados</span>
-            </span>
-          </div>
-          <div className="h-px flex-1 bg-white/5 mx-6 hidden md:block" />
-        </div>
+          <select
+            value={activeSucursal}
+            onChange={(e) => {
+              const val = e.target.value
+              setActiveSucursal(val)
+              table.getColumn("sucursal")?.setFilterValue(val === "Todas" ? "" : val)
+            }}
+            aria-label="Filtrar por sucursal"
+            className="h-9 rounded-xl border border-slate-700 bg-slate-900 px-3 text-xs font-medium text-slate-200 focus:outline-none focus:border-[#16a085]"
+          >
+            <option value="Todas">Todas las sucursales</option>
+            <option value="Las Condes">Las Condes</option>
+            <option value="Providencia">Providencia</option>
+            <option value="Ñuñoa">Ñuñoa</option>
+            <option value="Maipú">Maipú</option>
+            <option value="La Florida">La Florida</option>
+            <option value="Peñalolén">Peñalolén</option>
+            <option value="San Miguel">San Miguel</option>
+            <option value="Pudahuel">Pudahuel</option>
+          </select>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Especie</span>
-            <select
-              value={activeEspecie}
-              onChange={(e) => {
-                const val = e.target.value
-                setActiveEspecie(val)
-                table.getColumn("especie")?.setFilterValue(val === "Todos" ? "" : val)
-              }}
-              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-[#1D9E75]/40 transition-all appearance-none cursor-pointer"
-            >
-              <option value="Todos" className="bg-[#13141C]">Todos</option>
-              <option value="Perro" className="bg-[#13141C]">Perro</option>
-              <option value="Gato" className="bg-[#13141C]">Gato</option>
-              <option value="Exotico" className="bg-[#13141C]">Exótico</option>
-              <option value="Ave" className="bg-[#13141C]">Ave</option>
-            </select>
-          </div>
+          <select
+            value={activeRiesgo}
+            onChange={(e) => {
+              const val = e.target.value
+              setActiveRiesgo(val)
+              table.getColumn("nivel_riesgo")?.setFilterValue(val === "Todos" ? "" : val)
+            }}
+            aria-label="Filtrar por nivel de riesgo"
+            className="h-9 rounded-xl border border-slate-700 bg-slate-900 px-3 text-xs font-medium text-slate-200 focus:outline-none focus:border-[#16a085]"
+          >
+            <option value="Todos">Todos los niveles</option>
+            <option value="Alto">Riesgo alto</option>
+            <option value="Medio">Riesgo medio</option>
+            <option value="Bajo">Riesgo bajo</option>
+          </select>
 
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Nivel de Riesgo</span>
-            <select
-              value={activeRiesgo}
-              onChange={(e) => {
-                const val = e.target.value
-                setActiveRiesgo(val)
-                table.getColumn("nivel_riesgo")?.setFilterValue(val === "Todos" ? "" : val)
-              }}
-              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-amber-500/40 transition-all appearance-none cursor-pointer"
-            >
-              {["Todos", "Alto", "Medio", "Bajo"].map(opt => <option key={opt} value={opt} className="bg-[#13141C]">{opt}</option>)}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest ml-1">Sucursal</span>
-            <select
-              value={activeSucursal}
-              onChange={(e) => {
-                const val = e.target.value
-                setActiveSucursal(val)
-                table.getColumn("sucursal")?.setFilterValue(val === "Todas" ? "" : val)
-              }}
-              className="h-10 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-semibold text-white/80 focus:outline-none focus:border-blue-500/40 transition-all appearance-none cursor-pointer"
-            >
-              <option value="Todas" className="bg-[#13141C]">Todas las sucursales</option>
-              <option value="La Florida" className="bg-[#13141C]">La Florida</option>
-              <option value="Las Condes" className="bg-[#13141C]">Las Condes</option>
-              <option value="Maipu" className="bg-[#13141C]">Maipú</option>
-              <option value="Nunoa" className="bg-[#13141C]">Ñuñoa</option>
-              <option value="Penalolen" className="bg-[#13141C]">Peñalolén</option>
-              <option value="Providencia" className="bg-[#13141C]">Providencia</option>
-              <option value="Pudahuel" className="bg-[#13141C]">Pudahuel</option>
-              <option value="San Miguel" className="bg-[#13141C]">San Miguel</option>
-            </select>
-          </div>
+          <Button
+            onClick={exportarCSV}
+            variant="outline"
+            size="sm"
+            className="ml-auto h-9 border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold flex items-center gap-1.5"
+          >
+            <Download className="h-3.5 w-3.5 text-[#16a085]" />
+            <span>Exportar CSV</span>
+          </Button>
         </div>
       </div>
 
-      <div className="rounded-[32px] border border-white/5 bg-white/[0.01] overflow-hidden overflow-x-auto shadow-2xl relative">
-        <table className="w-full text-sm">
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id} className="bg-white/5 border-b border-white/5">
-                {headerGroup.headers.map(header => (
-                  <th key={header.id} className="h-14 px-6 text-left align-middle font-bold text-white/50 uppercase text-[9px] tracking-widest">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
+      <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/50 shadow-md">
+        <Table>
+          <TableHeader className="bg-slate-900 border-b border-slate-800">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort()
+                  const sortDir = header.column.getIsSorted()
+                  return (
+                    <TableHead
+                      key={header.id}
+                      onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                      className={`text-slate-400 font-bold text-xs py-3 px-4 select-none ${
+                        canSort ? "cursor-pointer hover:text-white transition-colors" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                        {canSort && (
+                          <span className="text-slate-500">
+                            {sortDir === "asc" ? (
+                              <ArrowUp className="h-3.5 w-3.5 text-[#16a085]" />
+                            ) : sortDir === "desc" ? (
+                              <ArrowDown className="h-3.5 w-3.5 text-[#16a085]" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-40 hover:opacity-100" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
             ))}
-          </thead>
-          <tbody className="divide-y divide-white/[0.02]">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, i) => (
-                <tr key={row.id} className="group transition-colors hover:bg-[#1D9E75]/5 animate-in-up" style={{ animationDelay: `${i * 30}ms` }}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4 align-middle">
+          </TableHeader>
+          <TableBody className="divide-y divide-slate-800 text-xs text-slate-200">
+            {error ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="p-4">
+                  <ErrorPanel
+                    mensaje="No se pudo obtener el censo de pacientes desde la API."
+                    onReintentar={cargarDatos}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-32 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="h-5 w-5 border-2 border-[#16a085] border-t-transparent rounded-full animate-spin" />
+                    <span>Cargando censo de pacientes...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="group/accion border-slate-800/80 hover:bg-slate-800/40 transition-colors"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="py-3 px-4 align-middle">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan={columns.length} className="h-60 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="size-8 rounded-full border-2 border-[#1D9E75] border-t-transparent animate-spin" />
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#1D9E75] animate-pulse">Sincronizando Modelo...</p>
-                  </div>
-                </td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-28 text-center text-slate-400">
+                  No se encontraron pacientes con los filtros seleccionados.
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
-      <div className="flex items-center justify-end px-2">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all text-white/50 hover:text-white">
-            <ChevronLeft className="h-5 w-5" />
+      <div className="flex items-center justify-between px-1 text-xs text-slate-400">
+        <div>
+          Mostrando{" "}
+          <span className="font-semibold text-white">
+            {table.getRowModel().rows.length}
+          </span>{" "}
+          de{" "}
+          <span className="font-semibold text-white">
+            {table.getFilteredRowModel().rows.length}
+          </span>{" "}
+          pacientes
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 px-2.5 border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-30"
+          >
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-[10px] font-black text-white/90 uppercase tracking-widest">
-            Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+          <span className="font-medium text-slate-300">
+            Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
           </span>
-          <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-10 w-10 p-0 rounded-xl hover:bg-white/5 disabled:opacity-20 transition-all text-white/50 hover:text-white">
-            <ChevronRight className="h-5 w-5" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8 px-2.5 border-slate-700 bg-slate-900 text-slate-300 disabled:opacity-30"
+          >
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

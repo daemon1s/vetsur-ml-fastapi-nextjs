@@ -4,7 +4,7 @@ from typing import Literal
 TipoEspecie = Literal["Perro", "Gato", "Exótico", "Ave"]
 TipoSucursal = Literal[
     "Las Condes", "Maipú", "Ñuñoa", "Peñalolén", 
-    "Providencia", "Pudahuel", "San Miguel"
+    "Providencia", "Pudahuel", "San Miguel", "La Florida"
 ]
 TipoAtencion = Literal[
     "Consulta especialidad", "Consulta general", 
@@ -37,6 +37,7 @@ class DatosPaciente(BaseModel):
 
 class RespuestaPrediccion(BaseModel):
     probabilidad_retorno: float = Field(..., ge=0.0, le=1.0)
+    probabilidad_abandono: float = Field(..., ge=0.0, le=1.0, description="Probabilidad de abandono o fuga predicha por el modelo.")
     prediccion_clase: int = Field(..., description="1 si retorna, 0 si no retorna")
     nivel_riesgo: Literal["Alto", "Medio", "Bajo"] = Field(..., description="Nivel de riesgo de abandono del paciente.")
     accion_sugerida: str = Field(..., description="Acción sugerida para el equipo de retención.")

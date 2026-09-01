@@ -1,37 +1,39 @@
 import axios from "axios"
-import type { DatosPaciente, RespuestaPrediccion, PacienteRiesgo } from "@/types/vetsur"
+import type {
+  DatosPaciente,
+  RespuestaPrediccion,
+  PacienteRiesgo,
+  RespuestaEstadisticas,
+} from "@/types/vetsur"
 
-// Nota: Aquí definimos la dirección del servidor (Backend). 
-// Si estamos en producción usa una variable de entorno, si no, usa el localhost.
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8008"
 
-// Nota: Usamos Axios para realizar las peticiones HTTP de forma sencilla y organizada.
 export const apiClient = axios.create({
   baseURL,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
 })
 
 export const apiObj = {
-  // Nota: Este objeto agrupa todas las funciones que llaman a la API de Python.
-  healthCheck: async () => {
+  healthCheck: async (): Promise<{ status: string; modelo_listo: boolean }> => {
     const response = await apiClient.get<{ status: string; modelo_listo: boolean }>("/salud")
     return response.data
   },
 
-  predecirPaciente: async (datos: DatosPaciente) => {
+  predecirPaciente: async (datos: DatosPaciente): Promise<RespuestaPrediccion> => {
     const response = await apiClient.post<RespuestaPrediccion>("/predecir", datos)
     return response.data
   },
 
-  obtenerPacientesEnRiesgo: async () => {
+  obtenerPacientesEnRiesgo: async (): Promise<PacienteRiesgo[]> => {
     const response = await apiClient.get<PacienteRiesgo[]>("/pacientes-en-riesgo")
-    return response.data
+    return response.data || []
   },
 
-  obtenerEstadisticas: async () => {
-    const response = await apiClient.get<any>("/estadisticas")
+  obtenerEstadisticas: async (): Promise<RespuestaEstadisticas> => {
+    const response = await apiClient.get<RespuestaEstadisticas>("/estadisticas")
     return response.data
   },
 }

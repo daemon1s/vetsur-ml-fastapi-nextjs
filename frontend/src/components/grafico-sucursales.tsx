@@ -1,98 +1,109 @@
 "use client"
-import React from "react"
-import {
-  Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cell
-} from "recharts"
-import { MapPin } from "lucide-react"
 
-const fallback = [
-  { sucursal: "Las Condes", riesgo: 40, retorno: 80 },
-  { sucursal: "Providencia", riesgo: 30, retorno: 60 },
-  { sucursal: "Ñuñoa", riesgo: 40, retorno: 110 },
-  { sucursal: "Maipú", riesgo: 80, retorno: 120 },
-  { sucursal: "La Florida", riesgo: 40, retorno: 70 },
-]
+import React, { useState } from "react"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { VacioPanel } from "@/components/estados"
+import type { EstadisticaSucursal } from "@/types/vetsur"
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#13141C]/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-2xl animate-in-up">
-        <p className="font-bold text-white text-[10px] uppercase tracking-widest mb-3 border-b border-white/5 pb-2">{label}</p>
-        <div className="space-y-2">
-          {payload.map((p: any) => (
-            <div key={p.name} className="flex items-center justify-between gap-6">
-              <span className="text-[10px] font-bold text-white/50 uppercase tracking-tight">{p.name}</span>
-              <span className="text-sm font-bold" style={{ color: p.fill }}>{p.value}</span>
+interface GraficoSucursalesProps {
+  data?: EstadisticaSucursal[]
+}
+
+export function GraficoSucursales({ data = [] }: GraficoSucursalesProps) {
+  const [hoveredSucursal, setHoveredSucursal] = useState<string | null>(null)
+
+  const items = data || []
+  const totalPeriodo = items.reduce((acc, curr) => acc + curr.retorno + curr.riesgo, 0)
+  const totalRetorno = items.reduce((acc, curr) => acc + curr.retorno, 0)
+  const tasaGlobal = totalPeriodo > 0 ? ((totalRetorno / totalPeriodo) * 100).toFixed(1) : "0.0"
+
+  return (
+    <Card className="border border-slate-800 bg-[#131d2e] shadow-md flex flex-col justify-between">
+      <CardHeader className="pb-3 border-b border-slate-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-bold text-white tracking-tight">
+                Retención de pacientes por sucursal
+              </CardTitle>
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#16a085]/15 text-[#16a085] border border-[#16a085]/30">
+                {tasaGlobal}% global
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-  return null
-}
-
-const RenderCustomLegend = (props: any) => {
-  const { payload } = props
-  return (
-    <div className="flex items-center gap-6 pt-8 px-2">
-      {payload.map((entry: any, index: number) => (
-        <div key={`item-${index}`} className="flex items-center gap-2.5 group cursor-default transition-all">
-          <div 
-            className="w-2 h-2 rounded-full transition-all duration-500 group-hover:scale-125" 
-            style={{ 
-              backgroundColor: entry.color,
-              boxShadow: `0 0 12px ${entry.color}88`,
-              filter: `drop-shadow(0 0 2px ${entry.color})`
-            }}
-          />
-          <span 
-            className="text-[9px] font-black uppercase tracking-[0.15em] transition-colors duration-300"
-            style={{ color: `${entry.color}cc` }}
-          >
-            {entry.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-export function GraficoSucursales({ data: propsData }: { data?: any[] }) {
-  const chartData = propsData || []
-  return (
-    <div className="bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-2xl transition-all hover:border-white/20 group overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-      <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-            <MapPin className="h-4 w-4 text-[#1D9E75]" />
+            <CardDescription className="text-xs text-slate-400 mt-0.5">
+              Comparativa de pacientes fidelizados vs pacientes en riesgo por clínica
+            </CardDescription>
           </div>
-          <h3 className="text-xs font-bold text-white/80 uppercase tracking-widest">Censo por Sucursal</h3>
-        </div>
-      </div>
 
-      <div className="h-[280px] w-full relative z-10">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-            <XAxis type="number" hide />
-            <YAxis
-              dataKey="sucursal"
-              type="category"
-              width={100}
-              tick={{ fill: "rgba(255,255,255,0.75)", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Legend content={<RenderCustomLegend />} />
-            <Bar dataKey="riesgo" stackId="a" fill="#E24B4A" radius={[0, 0, 0, 0]} name="Alto riesgo" barSize={12} />
-            <Bar dataKey="retorno" stackId="a" fill="#1D9E75" radius={[0, 10, 10, 0]} name="Retorno probable" barSize={12} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 self-start sm:self-auto">
+            <span>{items.length} sucursales activas</span>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-3 pb-4 px-4 space-y-3">
+        {items.length === 0 ? (
+          <VacioPanel
+            titulo="Sin datos de sucursales"
+            detalle="No hay información por clínica para el período consultado."
+          />
+        ) : (
+          <>
+        <div className="flex items-center gap-4 text-[11px] text-slate-400 px-1 border-b border-slate-800/60 pb-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#16a085]" />
+              <span className="text-slate-300">Fidelizados</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#e74c3c]" />
+              <span className="text-slate-300">En riesgo</span>
+            </div>
+          </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {items.map((item) => {
+            const total = item.retorno + item.riesgo
+            const pctRetorno = total > 0 ? (item.retorno / total) * 100 : 0
+            const isHovered = hoveredSucursal === item.sucursal
+
+            return (
+              <div
+                key={item.sucursal}
+                onMouseEnter={() => setHoveredSucursal(item.sucursal)}
+                onMouseLeave={() => setHoveredSucursal(null)}
+                className={`p-2.5 rounded-xl border transition-all ${
+                  isHovered
+                    ? "bg-slate-900 border-slate-700 shadow-md"
+                    : "bg-slate-900/40 border-slate-800/80 hover:bg-slate-900/70"
+                }`}
+              >
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="font-semibold text-slate-200">{item.sucursal}</span>
+                  <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                    <span className="text-[#16a085] font-bold">{item.retorno}</span>
+                    <span className="text-slate-500">/</span>
+                    <span className="text-rose-400 font-bold">{item.riesgo}</span>
+                    <span className="text-slate-400 font-medium ml-1">({pctRetorno.toFixed(0)}%)</span>
+                  </div>
+                </div>
+
+                <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden flex border border-slate-800">
+                  <div
+                    style={{ width: `${pctRetorno}%` }}
+                    className="h-full bg-[#16a085] transition-all duration-300"
+                  />
+                  <div
+                    style={{ width: `${100 - pctRetorno}%` }}
+                    className="h-full bg-[#e74c3c] transition-all duration-300"
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }

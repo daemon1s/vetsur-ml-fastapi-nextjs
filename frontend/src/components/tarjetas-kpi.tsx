@@ -1,61 +1,97 @@
-import { LucideIcon } from "lucide-react"
+import React from "react"
+import type { LucideIcon } from "lucide-react"
+import { TrendingUp, AlertTriangle, Clock, HeartPulse } from "lucide-react"
+import { Skeleton } from "@/components/estados"
+import type { EstadisticasKpis } from "@/types/vetsur"
 
-interface MetricDetail {
-  label: string
+interface FichaKpiProps {
+  etiqueta: string
   valor: string
-  subtexto: string
-  highlight?: boolean
-}
-
-interface KpiDualProps {
-  metricaPrincipal: MetricDetail
-  metricaSecundaria: MetricDetail
+  detalle: string
+  colorAcento: string
   icono: LucideIcon
-  color?: string
+  cargando?: boolean
 }
 
-export function TarjetaKpiML({ metricaPrincipal, metricaSecundaria, icono: Icono, color = "#1D9E75" }: KpiDualProps) {
+export const formatearNumero = (num: number | string) =>
+  num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+
+export function FichaKpi({
+  etiqueta,
+  valor,
+  detalle,
+  colorAcento,
+  icono: Icono,
+  cargando = false,
+}: FichaKpiProps) {
   return (
-    <div 
-      className="relative overflow-hidden bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:border-white/20 group animate-in-up"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      
-      <div className="relative z-10 space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
-            <Icono className="h-4 w-4 transition-colors duration-500" style={{ color }} />
-          </div>
+    <div className={`rounded-xl border border-slate-800 bg-[#101b2d] p-4 border-t-2 ${colorAcento}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-slate-400">{etiqueta}</p>
+          {cargando ? (
+            <Skeleton className="mt-2 h-8 w-24" />
+          ) : (
+            <p className="mt-1.5 font-mono text-3xl font-bold tracking-tight text-white">{valor}</p>
+          )}
+          {cargando ? (
+            <Skeleton className="mt-2 h-3 w-36" />
+          ) : (
+            <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">{detalle}</p>
+          )}
         </div>
-
-        <div className="grid grid-cols-2 gap-8 divide-x divide-white/5">
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-              {metricaPrincipal.label}
-            </p>
-            <div className="text-4xl font-bold text-white tracking-tight drop-shadow-2xl">
-              {metricaPrincipal.valor}
-            </div>
-            <p className={`text-[11px] font-bold tracking-tight ${metricaPrincipal.highlight ? "text-[#1D9E75]" : "text-white/40"}`}>
-              {metricaPrincipal.subtexto}
-            </p>
-          </div>
-
-          <div className="pl-8 space-y-2">
-            <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-              {metricaSecundaria.label}
-            </p>
-            <div className="text-4xl font-bold text-white tracking-tight drop-shadow-2xl">
-              {metricaSecundaria.valor}
-            </div>
-            <p className={`text-[11px] font-bold tracking-tight ${metricaSecundaria.highlight ? "text-[#1D9E75]" : "text-white/40"}`}>
-              {metricaSecundaria.subtexto}
-            </p>
-          </div>
-        </div>
+        <Icono className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
       </div>
+    </div>
+  )
+}
+
+interface TarjetasKpiProps {
+  kpis?: EstadisticasKpis
+  cargando?: boolean
+}
+
+export function TarjetasKpiEjecutivas({ kpis, cargando = false }: TarjetasKpiProps) {
+  const total = kpis?.total_pacientes ?? 0
+  const riesgoAlto = kpis?.riesgo_alto ?? 0
+  const tasaRetencion = kpis?.tasa_retencion ?? "0.0%"
+  const ventanaPreventiva = kpis?.riesgo_medio ?? kpis?.visitas_90 ?? 0
+  const activos = kpis?.riesgo_bajo ?? Math.max(0, total - riesgoAlto - ventanaPreventiva)
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <FichaKpi
+        etiqueta="Tasa de retención global"
+        valor={tasaRetencion}
+        detalle={`${formatearNumero(total)} pacientes en las 8 clínicas`}
+        colorAcento="border-t-[#16a085]"
+        icono={TrendingUp}
+        cargando={cargando}
+      />
+      <FichaKpi
+        etiqueta="Pacientes en riesgo alto"
+        valor={formatearNumero(riesgoAlto)}
+        detalle="Probabilidad de abandono mayor a 65%"
+        colorAcento="border-t-[#e74c3c]"
+        icono={AlertTriangle}
+        cargando={cargando}
+      />
+      <FichaKpi
+        etiqueta="Ventana preventiva"
+        valor={formatearNumero(ventanaPreventiva)}
+        detalle="Entre 30 y 90 días sin visita"
+        colorAcento="border-t-[#f39c12]"
+        icono={Clock}
+        cargando={cargando}
+      />
+      <FichaKpi
+        etiqueta="Pacientes activos"
+        valor={formatearNumero(activos)}
+        detalle="Menos de 30 días desde su última visita"
+        colorAcento="border-t-[#3498db]"
+        icono={HeartPulse}
+        cargando={cargando}
+      />
     </div>
   )
 }

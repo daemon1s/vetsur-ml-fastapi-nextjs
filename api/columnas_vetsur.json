@@ -1,1 +1,9 @@
-["dias_desde_ultima_visita", "visitas_historicas", "monto_cobrado", "costo_medicamento", "edad_mascota_anios", "tiene_vacunas_al_dia", "tipo_atencion_venta_producto"]
+[
+  "dias_desde_ultima_visita",
+  "visitas_historicas",
+  "tipo_atencion_consulta_general",
+  "tiene_vacunas_al_dia",
+  "monto_cobrado",
+  "tipo_atencion_venta_producto",
+  "costo_medicamento"
+]

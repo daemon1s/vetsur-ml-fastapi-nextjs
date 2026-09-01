@@ -9,6 +9,7 @@ services:
     volumes:
       - ./api/modelo_vetsur.pkl:/app/modelo_vetsur.pkl
       - ./api/columnas_vetsur.json:/app/columnas_vetsur.json
+      - ./api/imputaciones_vetsur.json:/app/imputaciones_vetsur.json
       - ./api/caso1_vetsur.csv:/app/caso1_vetsur.csv
       - ./api/data:/app/data
     env_file: .env

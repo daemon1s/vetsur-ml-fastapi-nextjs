@@ -1,0 +1,11 @@
+{
+  "mediana_monto": 42100.0,
+  "mediana_costo_global": 9500.0,
+  "mediana_costo_por_atencion": {
+    "cirugia": 54350.0,
+    "consulta_especialidad": 13950.0,
+    "consulta_general": 6700.0,
+    "hospitalizacion": 32100.0,
+    "venta_producto": 5200.0
+  }
+}

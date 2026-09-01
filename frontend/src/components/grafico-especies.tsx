@@ -1,62 +1,140 @@
 "use client"
-import React from "react"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts"
-import { PawPrint } from "lucide-react"
 
-const fallback = [
-  { especie: "Perro", cantidad: 802 },
-  { especie: "Gato", cantidad: 451 },
-  { especie: "Ave", cantidad: 90 },
-  { especie: "Exótico", cantidad: 57 },
-]
+import React, { useState } from "react"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { VacioPanel } from "@/components/estados"
+import type { EstadisticaEspecie } from "@/types/vetsur"
 
-const COLORS = ["#1D9E75", "#25C08F", "#E24B4A", "#FBBF24"]
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#13141C]/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-2xl transition-all duration-300">
-        <p className="font-bold text-white text-[10px] uppercase tracking-widest mb-2 border-b border-white/5 pb-2">{label}</p>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-bold text-white/50 uppercase">Población</span>
-          <span className="text-lg font-bold text-white tracking-widest">{payload[0].value}</span>
-        </div>
-      </div>
-    )
-  }
-  return null
+interface GraficoEspeciesProps {
+  data?: EstadisticaEspecie[]
 }
 
-export function GraficoEspecies({ data: propsData }: { data?: any[] }) {
-  const chartData = propsData || []
+const PALETA_NOTEBOOK: Record<string, string> = {
+  Perro: "#16a085",
+  Gato: "#3498db",
+  Exótico: "#f39c12",
+  Exotico: "#f39c12",
+  Ave: "#9b59b6",
+}
+
+export function GraficoEspecies({ data = [] }: GraficoEspeciesProps) {
+  const [hovered, setHovered] = useState<string | null>(null)
+
+  const chartData = data || []
+  const total = chartData.reduce((acc, curr) => acc + (curr.cantidad || 0), 0)
+
+  const radius = 55
+  const circumference = 2 * Math.PI * radius
+  let accumulatedOffset = 0
+
+  const slices = chartData.map((item) => {
+    const pct = total > 0 ? item.cantidad / total : 0
+    const strokeDash = pct * circumference
+    const offset = accumulatedOffset
+    accumulatedOffset += strokeDash
+    const color = PALETA_NOTEBOOK[item.especie] || "#16a085"
+
+    return {
+      especie: item.especie,
+      cantidad: item.cantidad,
+      pct: (pct * 100).toFixed(1),
+      strokeDash,
+      offset,
+      color,
+    }
+  })
+
   return (
-    <div className="bg-[#0A0B10] border border-white/10 p-8 rounded-[32px] shadow-2xl transition-all hover:border-white/20 group overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-      <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-            <PawPrint className="h-4 w-4 text-[#1D9E75]" />
-          </div>
-          <h3 className="text-xs font-bold text-white/80 uppercase tracking-widest">Distribución Especies</h3>
+    <Card className="border border-slate-800 bg-[#131d2e] shadow-md flex flex-col justify-between">
+      <CardHeader className="pb-3 border-b border-slate-800/80">
+        <div>
+          <CardTitle className="text-base font-bold text-white tracking-tight">
+            Distribución por especie
+          </CardTitle>
+          <CardDescription className="text-xs text-slate-400 mt-0.5">
+            Composición demográfica de la red
+          </CardDescription>
         </div>
-      </div>
+      </CardHeader>
 
-      <div className="h-[280px] w-full relative z-10">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
-            <XAxis dataKey="especie" tick={{ fill: "rgba(255,255,255,0.8)", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
-            <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Bar dataKey="cantidad" radius={[12, 12, 8, 8]} barSize={40}>
-              {chartData.map((_: any, index: number) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+      <CardContent className="pt-4 space-y-4">
+        {chartData.length === 0 ? (
+          <VacioPanel
+            titulo="Sin datos de especies"
+            detalle="No hay composición demográfica para el período consultado."
+          />
+        ) : (
+          <>
+        <div className="relative w-full h-[180px] flex items-center justify-center">
+          <svg viewBox="0 0 160 160" className="w-44 h-44 -rotate-90">
+            <circle
+              cx="80"
+              cy="80"
+              r={radius}
+              fill="none"
+              stroke="#1e293b"
+              strokeWidth="20"
+            />
+
+            {slices.map((slice) => (
+              <circle
+                key={slice.especie}
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke={slice.color}
+                strokeWidth={hovered === slice.especie ? "24" : "20"}
+                strokeDasharray={`${slice.strokeDash} ${circumference}`}
+                strokeDashoffset={-slice.offset}
+                className="transition-all duration-300 cursor-pointer"
+                onMouseEnter={() => setHovered(slice.especie)}
+                onMouseLeave={() => setHovered(null)}
+              />
+            ))}
+          </svg>
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-xl font-bold font-mono text-white">
+              {hovered
+                ? `${slices.find((s) => s.especie === hovered)?.pct}%`
+                : total.toLocaleString()}
+            </span>
+            <span className="text-[10px] font-semibold text-slate-400">
+              {hovered || "Total"}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {slices.map((item) => (
+            <div
+              key={item.especie}
+              onMouseEnter={() => setHovered(item.especie)}
+              onMouseLeave={() => setHovered(null)}
+              className={`flex items-center justify-between p-2 rounded-lg border transition-all cursor-pointer ${
+                hovered === item.especie
+                  ? "bg-slate-800 border-slate-600 shadow-md"
+                  : "bg-slate-900/60 border-slate-800 hover:bg-slate-900"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-xs font-semibold text-slate-200">{item.especie}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-mono">
+                <span className="font-bold text-white">{item.cantidad}</span>
+                <span className="text-slate-400 text-[11px]">({item.pct}%)</span>
+              </div>
+            </div>
+          ))}
+        </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
