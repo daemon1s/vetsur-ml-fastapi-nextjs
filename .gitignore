@@ -29,6 +29,11 @@ enfoque/
 data/
 scripts/
 
+# Herramientas y docs internos
+.agents/
+skills-lock.json
+docs/
+
 # OS junk
 .DS_Store
 Thumbs.db
