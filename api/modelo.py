@@ -81,6 +81,17 @@ class ModeloVetSur:
         }
         return map_esp.get(s, str(texto).capitalize())
 
+    def _formatear_atencion(self, texto: str) -> str:
+        s = self._limpiar_texto(str(texto))
+        map_ate = {
+            "consulta_general": "Consulta general",
+            "consulta_especialidad": "Consulta especialidad",
+            "venta_producto": "Venta producto",
+            "hospitalizacion": "Hospitalización",
+            "cirugia": "Cirugía",
+        }
+        return map_ate.get(s, str(texto).replace("_", " ").capitalize())
+
     def _evaluar_riesgo(self, probabilidad_abandono: float) -> Tuple[str, str]:
         if probabilidad_abandono >= 0.65:
             return "Alto", "Contactar inmediatamente al cliente por WhatsApp para ofrecer chequeo preventivo."
@@ -201,7 +212,11 @@ class ModeloVetSur:
                 "tiene_vacunas_al_dia": vacunas,
                 "probabilidad_abandono": p_abandono,
                 "nivel_riesgo": riesgo,
-                "accion_sugerida": accion
+                "accion_sugerida": accion,
+                "visitas_historicas": int(row.get('visitas_historicas', 0) or 0),
+                "monto_cobrado": float(row.get('monto_cobrado', 0) or 0),
+                "costo_medicamento": float(row.get('costo_medicamento', 0) or 0) if not pd.isna(row.get('costo_medicamento', 0)) else 0.0,
+                "tipo_atencion": self._formatear_atencion(str(row.get('tipo_atencion', '')))
             })
 
         df_res = pd.DataFrame(res)

@@ -62,6 +62,10 @@ export interface PacienteRiesgo {
   probabilidad_abandono: number
   nivel_riesgo: NivelRiesgo
   accion_sugerida: string
+  visitas_historicas?: number | null
+  monto_cobrado?: number | null
+  costo_medicamento?: number | null
+  tipo_atencion?: string | null
 }
 
 export interface EstadisticasKpis {

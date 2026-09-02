@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Literal
+from typing import Literal, Optional
 
 TipoEspecie = Literal["Perro", "Gato", "Exótico", "Ave"]
 TipoSucursal = Literal[
@@ -51,3 +51,7 @@ class PacienteRiesgo(BaseModel):
     probabilidad_abandono: float
     nivel_riesgo: Literal["Alto", "Medio", "Bajo"]
     accion_sugerida: str
+    visitas_historicas: Optional[int] = None
+    monto_cobrado: Optional[float] = None
+    costo_medicamento: Optional[float] = None
+    tipo_atencion: Optional[str] = None

@@ -202,6 +202,20 @@ class TestEndpoints:
             PacienteRiesgo(**item)
             assert 0 <= item["probabilidad_abandono"] <= 1
 
+    def test_contrato_pacientes_en_riesgo_campos_modelo(self, client):
+        respuesta = client.get("/pacientes-en-riesgo")
+        assert respuesta.status_code == 200
+        items = respuesta.json()
+        assert len(items) == 1400
+        for item in items:
+            assert item["visitas_historicas"] is not None
+            assert item["monto_cobrado"] is not None
+            assert item["costo_medicamento"] is not None
+            assert isinstance(item["tipo_atencion"], str) and item["tipo_atencion"].strip()
+            assert item["visitas_historicas"] >= 1
+            assert item["monto_cobrado"] >= 0
+            assert item["costo_medicamento"] >= 0
+
     def test_salud_y_prefijo_api(self, client):
         for ruta in ["/salud", "/api/salud"]:
             respuesta = client.get(ruta)

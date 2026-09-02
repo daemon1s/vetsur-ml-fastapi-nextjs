@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Download, Search, ChevronLeft, ChevronRight, MessageSquare, ArrowUpDown, ArrowUp, ArrowDown, Mail, Copy, Check } from "lucide-react"
+import { Download, Search, ChevronLeft, ChevronRight, MessageSquare, ArrowUpDown, ArrowUp, ArrowDown, Mail, Copy, Check, Info } from "lucide-react"
 import { ErrorPanel } from "@/components/estados"
 
 const normalizarSucursal = (s: string) => {
@@ -53,6 +53,11 @@ const normalizarEspecie = (s: string) => {
   }
   return map[clean] || s
 }
+
+const formatearNumero = (n: number) =>
+  Math.round(n)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 
 type FilaPaciente = Row<PacienteRiesgo>
 
@@ -106,6 +111,10 @@ export function TablaPacientes() {
       "Sucursal",
       "Días inactivo",
       "Vacunas al día",
+      "Visitas históricas",
+      "Última atención",
+      "Monto cobrado",
+      "Costo medicamento",
       "Probabilidad de abandono",
       "Nivel de riesgo",
       "Acción sugerida",
@@ -116,6 +125,10 @@ export function TablaPacientes() {
       normalizarSucursal(r.sucursal),
       r.dias_desde_ultima_visita,
       r.tiene_vacunas_al_dia ? "Al día" : "Vencidas",
+      r.visitas_historicas ?? "",
+      r.tipo_atencion ?? "",
+      r.monto_cobrado ?? "",
+      r.costo_medicamento ?? "",
       `${(r.probabilidad_abandono * 100).toFixed(1)}%`,
       r.nivel_riesgo,
       `"${r.accion_sugerida.replace(/"/g, '""')}"`,
@@ -147,6 +160,102 @@ export function TablaPacientes() {
           #{row.original.paciente_id}
         </span>
       ),
+    },
+    {
+      accessorKey: "probabilidad_abandono",
+      header: "Probabilidad de abandono",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const val = Number(row.original.probabilidad_abandono)
+        const pct = (val * 100).toFixed(1)
+        const isHigh = val >= 0.65
+        const isMed = val >= 0.30 && val < 0.65
+
+        const barColor = isHigh ? "bg-[#e74c3c]" : isMed ? "bg-[#f39c12]" : "bg-[#16a085]"
+        const textColor = isHigh ? "text-rose-400" : isMed ? "text-amber-400" : "text-emerald-400"
+
+        return (
+          <div className="flex items-center gap-2.5 min-w-[140px]">
+            <div className="w-20 h-2 bg-slate-900 rounded-full overflow-hidden flex-shrink-0 border border-slate-800">
+              <div
+                className={`h-full rounded-full ${barColor}`}
+                style={{ width: `${Math.min(100, Math.max(5, val * 100))}%` }}
+              />
+            </div>
+            <span className={`font-mono text-xs font-bold ${textColor}`}>
+              {pct}%
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "nivel_riesgo",
+      header: "Nivel de riesgo",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const val = Number(row.original.probabilidad_abandono)
+        const risk = val >= 0.65 ? "Alto" : val >= 0.30 ? "Medio" : "Bajo"
+        const estilosBadge: Record<string, string> = {
+          Alto: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+          Medio: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+          Bajo: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+        }
+
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`${estilosBadge[risk]} text-[11px] font-bold`}>
+              {risk}
+            </Badge>
+            <span className="relative inline-flex group/riesgo">
+              <Info className="h-3.5 w-3.5 cursor-help text-slate-500 transition-colors group-hover/riesgo:text-slate-300" />
+              <span className="pointer-events-none absolute right-0 bottom-full z-50 mb-1.5 hidden w-72 rounded-lg border border-slate-700 bg-[#101b2d] p-3 text-[11px] leading-relaxed text-slate-300 shadow-xl group-hover/riesgo:block">
+                {row.original.accion_sugerida}
+              </span>
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      id: "contacto",
+      header: () => <span className="text-right block">Acciones</span>,
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const paciente = row.original
+        const sucursalFormateada = normalizarSucursal(paciente.sucursal)
+        const guion = `Hola, le escribimos de la Clínica VetSur ${sucursalFormateada} para coordinar el control preventivo de su mascota (#${paciente.paciente_id}). ${paciente.accion_sugerida}`
+        const mensaje = encodeURIComponent(guion)
+        const whatsappUrl = `https://wa.me/?text=${mensaje}`
+        const emailUrl = `mailto:?subject=${encodeURIComponent(`Control preventivo · VetSur ${sucursalFormateada}`)}&body=${mensaje}`
+        const copiado = copiadoId === paciente.paciente_id
+
+        return (
+          <div className="flex justify-end gap-1.5">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Enviar por WhatsApp"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition-colors hover:bg-emerald-500/25"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={emailUrl}
+              title="Enviar por email"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
+            >
+              <Mail className="h-3.5 w-3.5" />
+            </a>
+            <button
+              type="button"
+              onClick={() => copiarGuion(paciente.paciente_id, guion)}
+              title={copiado ? "Guion copiado" : "Copiar guion de contacto"}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
+            >
+              {copiado ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        )
+      },
     },
     {
       accessorKey: "especie",
@@ -203,113 +312,44 @@ export function TablaPacientes() {
       },
     },
     {
-      accessorKey: "probabilidad_abandono",
-      header: "Probabilidad de abandono",
-      cell: ({ row }: { row: FilaPaciente }) => {
-        const val = Number(row.original.probabilidad_abandono)
-        const pct = (val * 100).toFixed(1)
-        const isHigh = val >= 0.65
-        const isMed = val >= 0.30 && val < 0.65
-
-        const barColor = isHigh ? "bg-[#e74c3c]" : isMed ? "bg-[#f39c12]" : "bg-[#16a085]"
-        const textColor = isHigh ? "text-rose-400" : isMed ? "text-amber-400" : "text-emerald-400"
-
-        return (
-          <div className="flex items-center gap-2.5 min-w-[140px]">
-            <div className="w-20 h-2 bg-slate-900 rounded-full overflow-hidden flex-shrink-0 border border-slate-800">
-              <div
-                className={`h-full rounded-full ${barColor}`}
-                style={{ width: `${Math.min(100, Math.max(5, val * 100))}%` }}
-              />
-            </div>
-            <span className={`font-mono text-xs font-bold ${textColor}`}>
-              {pct}%
-            </span>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: "nivel_riesgo",
-      header: "Nivel de riesgo",
-      cell: ({ row }: { row: FilaPaciente }) => {
-        const val = Number(row.original.probabilidad_abandono)
-        const risk = val >= 0.65 ? "Alto" : val >= 0.30 ? "Medio" : "Bajo"
-
-        if (risk === "Alto") {
-          return (
-            <Badge className="bg-rose-500/15 text-rose-400 border-rose-500/30 text-[11px] font-bold">
-              Alto
-            </Badge>
-          )
-        }
-        if (risk === "Medio") {
-          return (
-            <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-[11px] font-bold">
-              Medio
-            </Badge>
-          )
-        }
-        return (
-          <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[11px] font-bold">
-            Bajo
-          </Badge>
-        )
-      },
-    },
-    {
-      accessorKey: "accion_sugerida",
-      header: "Acción sugerida",
+      accessorKey: "visitas_historicas",
+      header: "Visitas",
       cell: ({ row }: { row: FilaPaciente }) => (
-        <span className="relative inline-block max-w-[300px]">
-          <span className="block cursor-help truncate text-xs text-slate-300 underline decoration-dotted decoration-slate-600 underline-offset-4">
-            {row.original.accion_sugerida}
-          </span>
-          <span className="pointer-events-none absolute left-0 top-full z-50 mt-1.5 hidden w-80 rounded-lg border border-slate-700 bg-[#101b2d] p-3 text-[11px] leading-relaxed text-slate-300 shadow-xl group-hover/accion:block">
-            {row.original.accion_sugerida}
-          </span>
+        <span className="font-mono font-semibold text-slate-200">
+          {row.original.visitas_historicas ?? "—"}
         </span>
       ),
     },
     {
-      id: "contacto",
-      header: () => <span className="text-right block">Acciones</span>,
+      accessorKey: "tipo_atencion",
+      header: "Última atención",
+      cell: ({ row }: { row: FilaPaciente }) => (
+        <span className="text-xs text-slate-300 font-medium">
+          {row.original.tipo_atencion ?? "—"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "monto_cobrado",
+      header: "Monto cobrado",
       cell: ({ row }: { row: FilaPaciente }) => {
-        const paciente = row.original
-        const sucursalFormateada = normalizarSucursal(paciente.sucursal)
-        const guion = `Hola, le escribimos de la Clínica VetSur ${sucursalFormateada} para coordinar el control preventivo de su mascota (#${paciente.paciente_id}). ${paciente.accion_sugerida}`
-        const mensaje = encodeURIComponent(guion)
-        const whatsappUrl = `https://wa.me/?text=${mensaje}`
-        const emailUrl = `mailto:?subject=${encodeURIComponent(`Control preventivo · VetSur ${sucursalFormateada}`)}&body=${mensaje}`
-        const copiado = copiadoId === paciente.paciente_id
-
+        const monto = row.original.monto_cobrado
         return (
-          <div className="flex justify-end gap-1.5">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Enviar por WhatsApp"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition-colors hover:bg-emerald-500/25"
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href={emailUrl}
-              title="Enviar por email"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
-            >
-              <Mail className="h-3.5 w-3.5" />
-            </a>
-            <button
-              type="button"
-              onClick={() => copiarGuion(paciente.paciente_id, guion)}
-              title={copiado ? "Guion copiado" : "Copiar guion de contacto"}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-300 transition-colors hover:bg-slate-800"
-            >
-              {copiado ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-            </button>
-          </div>
+          <span className="font-mono text-xs text-slate-300">
+            {monto != null ? `$${formatearNumero(monto)}` : "—"}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: "costo_medicamento",
+      header: "Costo medicamentos",
+      cell: ({ row }: { row: FilaPaciente }) => {
+        const costo = row.original.costo_medicamento
+        return (
+          <span className="font-mono text-xs text-slate-300">
+            {costo != null ? `$${formatearNumero(costo)}` : "—"}
+          </span>
         )
       },
     },
@@ -465,7 +505,7 @@ export function TablaPacientes() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="group/accion border-slate-800/80 hover:bg-slate-800/40 transition-colors"
+                  className="border-slate-800/80 hover:bg-slate-800/40 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-3 px-4 align-middle">
