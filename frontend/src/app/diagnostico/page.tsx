@@ -295,7 +295,7 @@ export default function DiagnosticoPage() {
                 <BarChart3 className="h-4 w-4" />
               </div>
               <div>
-                <CardTitle className="text-sm font-bold text-white">Importancia de las Variables Clínicas</CardTitle>
+                <CardTitle className="text-sm font-bold text-white">Importancia de las variables clínicas</CardTitle>
                 <CardDescription className="text-xs text-slate-400">
                   Ponderación Gini de señales extraídas del artefacto desplegado
                 </CardDescription>
@@ -372,9 +372,9 @@ export default function DiagnosticoPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-slate-800 bg-slate-900/80">
-                      <TableHead className="text-xs text-slate-300 font-semibold">Caso Clínico</TableHead>
-                      <TableHead className="text-xs text-slate-300 font-semibold">Inputs Clave</TableHead>
-                      <TableHead className="text-xs text-slate-300 font-semibold text-right">Prob. Abandono</TableHead>
+                      <TableHead className="text-xs text-slate-300 font-semibold">Caso clínico</TableHead>
+                      <TableHead className="text-xs text-slate-300 font-semibold">Inputs clave</TableHead>
+                      <TableHead className="text-xs text-slate-300 font-semibold text-right">Prob. abandono</TableHead>
                       <TableHead className="text-xs text-slate-300 font-semibold">Nivel</TableHead>
                       <TableHead className="text-xs text-slate-300 font-semibold">Esperado</TableHead>
                       <TableHead className="text-xs text-slate-300 font-semibold text-center">Suma ≈ 1</TableHead>

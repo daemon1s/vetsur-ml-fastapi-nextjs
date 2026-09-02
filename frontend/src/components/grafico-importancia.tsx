@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Sparkles, TrendingUp } from "lucide-react"
 
 interface FeatureItem {
@@ -90,6 +91,7 @@ function formatearInfo(feature: string) {
 
 export function GraficoImportancia({ features }: GraficoImportanciaProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+  const reduceMotion = useReducedMotion()
 
   const itemsOrdenados = [...features].sort((a, b) => b.importancia - a.importancia)
   const maximo = itemsOrdenados.length > 0 ? itemsOrdenados[0].importancia : 1
@@ -256,31 +258,53 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
         </svg>
       </div>
 
-      {/* Tooltip contextual explicativo según feature en hover */}
-      {hoveredMeta && hoveredItem ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-900/95 p-3 text-xs text-slate-300 shadow-md">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#16a085]/20 text-[#16a085]">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white">{hoveredMeta.nombre}</span>
-              <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-teal-400">
-                {(hoveredItem.importancia * 100).toFixed(1)}% peso relativo
-              </span>
-            </div>
-            <p className="mt-0.5 text-slate-400">{hoveredMeta.descripcion}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-[#16a085]" />
-            <span>Las 3 primeras variables concentran la mayor capacidad predictiva del modelo.</span>
-          </div>
-          <span className="font-mono text-[10px] text-slate-400">Gini / Feature Importance</span>
-        </div>
-      )}
+      {/* Panel contextual explicativo según feature en hover */}
+      <div className="overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          {hoveredMeta && hoveredItem ? (
+            <motion.div
+              key="tooltip"
+              initial={{ opacity: 0, height: reduceMotion ? "auto" : 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: reduceMotion ? "auto" : 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-900/95 p-3 text-xs text-slate-300 shadow-md">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#16a085]/20 text-[#16a085]">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white">{hoveredMeta.nombre}</span>
+                    <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-teal-400">
+                      {(hoveredItem.importancia * 100).toFixed(1)}% peso relativo
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-slate-400">{hoveredMeta.descripcion}</p>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="footer"
+              initial={{ opacity: 0, height: reduceMotion ? "auto" : 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: reduceMotion ? "auto" : 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-[#16a085]" />
+                  <span>Las 3 primeras variables concentran la mayor capacidad predictiva del modelo.</span>
+                </div>
+                <span className="font-mono text-[10px] text-slate-400">Gini / Feature Importance</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
