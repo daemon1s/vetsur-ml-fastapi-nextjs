@@ -207,7 +207,7 @@ export function TablaPacientes() {
             </Badge>
             <span className="relative inline-flex group/riesgo">
               <Info className="h-3.5 w-3.5 cursor-help text-slate-500 transition-colors group-hover/riesgo:text-slate-300" />
-              <span className="pointer-events-none absolute right-0 bottom-full z-50 mb-1.5 hidden w-72 rounded-lg border border-slate-700 bg-[#101b2d] p-3 text-[11px] leading-relaxed text-slate-300 shadow-xl group-hover/riesgo:block">
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full z-50 mt-1.5 hidden w-[250px] sm:w-[320px] whitespace-normal break-words rounded-lg border border-slate-700 bg-[#101b2d] p-3 text-[11px] leading-relaxed text-slate-300 shadow-xl group-hover/riesgo:block">
                 {row.original.accion_sugerida}
               </span>
             </span>
@@ -446,9 +446,9 @@ export function TablaPacientes() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/50 shadow-md">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-md">
         <Table>
-          <TableHeader className="bg-slate-900 border-b border-slate-800">
+          <TableHeader className="bg-slate-900 border-b border-slate-800 rounded-t-2xl overflow-hidden">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
