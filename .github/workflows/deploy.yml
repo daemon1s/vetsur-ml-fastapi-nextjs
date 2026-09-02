@@ -64,6 +64,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT || 22 }}
           script: |
+            set -e
             cd ~/vetsur-ml-fastapi-nextjs
             git pull origin main
             docker compose pull
