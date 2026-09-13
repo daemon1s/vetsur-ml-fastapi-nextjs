@@ -50,7 +50,7 @@ const DICCIONARIO_FEATURES: Record<
   especie: {
     nombre: "Especie del paciente",
     categoria: "Demografía",
-    descripcion: "Perro, Gato, Exótico u otras especies tratadas.",
+    descripcion: "Perro, gato, exótico u otras especies tratadas.",
   },
   sucursal: {
     nombre: "Sucursal de atención",
@@ -67,6 +67,16 @@ const DICCIONARIO_FEATURES: Record<
     categoria: "Operacional",
     descripcion: "Consulta general, urgencia, control o cirugía.",
   },
+  tipo_atencion_consulta_general: {
+    nombre: "Tipo de atención: consulta general",
+    categoria: "Operacional",
+    descripcion: "Atención médica general programada en consulta.",
+  },
+  tipo_atencion_venta_producto: {
+    nombre: "Tipo de atención: venta de productos",
+    categoria: "Operacional",
+    descripcion: "Compra de fármacos, insumos o alimentos en clínica.",
+  },
   raza_registrada: {
     nombre: "Raza registrada",
     categoria: "Demografía",
@@ -79,9 +89,8 @@ function formatearInfo(feature: string) {
   if (DICCIONARIO_FEATURES[normalizado]) {
     return DICCIONARIO_FEATURES[normalizado]
   }
-  const legible = feature
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase())
+  const palabras = feature.replace(/_/g, " ").toLowerCase()
+  const legible = palabras.charAt(0).toUpperCase() + palabras.slice(1)
   return {
     nombre: legible,
     categoria: "General",
@@ -115,7 +124,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
           className="h-auto w-full rounded-xl bg-slate-950/60 border border-slate-800/80 p-2"
         >
           <defs>
-            {/* Gradientes para barras de importancia */}
             <linearGradient id="barGradTop" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#16a085" />
               <stop offset="100%" stopColor="#2ecc71" />
@@ -149,7 +157,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
-                {/* Fondo resaltado en hover */}
                 <rect
                   x="6"
                   y={y}
@@ -161,7 +168,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   className="transition-colors"
                 />
 
-                {/* Badge de Ranking (#1, #2, etc.) */}
                 <rect
                   x="14"
                   y={y + 8}
@@ -195,7 +201,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   #{idx + 1}
                 </text>
 
-                {/* Nombre de la Variable */}
                 <text
                   x="48"
                   y={y + 18}
@@ -213,7 +218,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   {meta.categoria}
                 </text>
 
-                {/* Pista de fondo de la barra */}
                 <rect
                   x={BAR_START_X}
                   y={y + 12}
@@ -225,7 +229,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   strokeWidth="1"
                 />
 
-                {/* Barra de progreso con gradiente */}
                 <rect
                   x={BAR_START_X}
                   y={y + 12}
@@ -237,7 +240,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   className="transition-all duration-300"
                 />
 
-                {/* Porcentaje numérico */}
                 <text
                   x={SVG_WIDTH - 18}
                   y={y + 22}
@@ -258,7 +260,6 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
         </svg>
       </div>
 
-      {/* Panel contextual explicativo según feature en hover */}
       <div className="overflow-hidden">
         <AnimatePresence mode="wait" initial={false}>
           {hoveredMeta && hoveredItem ? (
@@ -299,7 +300,7 @@ export function GraficoImportancia({ features }: GraficoImportanciaProps) {
                   <TrendingUp className="h-3.5 w-3.5 text-[#16a085]" />
                   <span>Las 3 primeras variables concentran la mayor capacidad predictiva del modelo.</span>
                 </div>
-                <span className="font-mono text-[10px] text-slate-400">Gini / Feature Importance</span>
+                <span className="font-mono text-[10px] text-slate-400">Gini / importancia de variables</span>
               </div>
             </motion.div>
           )}
