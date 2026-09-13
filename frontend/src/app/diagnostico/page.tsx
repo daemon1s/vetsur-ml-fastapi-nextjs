@@ -88,8 +88,6 @@ const claseNivel = (nivel: NivelRiesgo) =>
     ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
     : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
 
-const aPct = (valor: number) => `${(valor * 100).toFixed(1)}%`
-
 export default function DiagnosticoPage() {
   const [estadoSalud, setEstadoSalud] = useState<EstadoConsulta>("cargando")
   const [salud, setSalud] = useState<{ status: string; modelo_listo: boolean } | null>(null)
@@ -179,7 +177,7 @@ export default function DiagnosticoPage() {
         {/* Cabecera de Página con Telemetría Integrada (sin divisor de fondo) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">Diagnóstico del Sistema ML</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">Diagnóstico del sistema ML</h1>
             <p className="text-xs text-slate-400 mt-0.5">
               Evaluación continua, calibración ROC y regresión funcional sobre el modelo en producción
             </p>
@@ -222,16 +220,16 @@ export default function DiagnosticoPage() {
           </div>
         </div>
         {/* Fila: Curva ROC y Matriz de Confusión */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {/* Tarjeta Curva ROC */}
-          <Card className="border border-slate-800 bg-[#131d2e] shadow-md overflow-hidden">
+          <Card className="border border-slate-800 bg-[#131d2e] shadow-md overflow-hidden flex flex-col h-full">
             <CardHeader className="pb-3 border-b border-slate-800/80">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#16a085]/15 text-[#16a085]">
                   <Activity className="h-4 w-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-bold text-white">Curva ROC (Discriminación)</CardTitle>
+                  <CardTitle className="text-sm font-bold text-white">Curva ROC (discriminación)</CardTitle>
                   <CardDescription className="text-xs text-slate-400">
                     Capacidad de detección de fugas vs. falsas alarmas
                   </CardDescription>
@@ -255,14 +253,14 @@ export default function DiagnosticoPage() {
           </Card>
 
           {/* Tarjeta Matriz de Confusión */}
-          <Card className="border border-slate-800 bg-[#131d2e] shadow-md overflow-hidden">
+          <Card className="border border-slate-800 bg-[#131d2e] shadow-md overflow-hidden flex flex-col h-full">
             <CardHeader className="pb-3 border-b border-slate-800/80">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e74c3c]/15 text-[#e74c3c]">
                   <Target className="h-4 w-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-bold text-white">Matriz de Confusión 2×2</CardTitle>
+                  <CardTitle className="text-sm font-bold text-white">Matriz de confusión 2×2</CardTitle>
                   <CardDescription className="text-xs text-slate-400">
                     Aciertos y errores clínicos del modelo en pacientes de prueba
                   </CardDescription>
@@ -322,7 +320,7 @@ export default function DiagnosticoPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm font-bold text-white">Regresión Funcional del Endpoint</CardTitle>
+                  <CardTitle className="text-sm font-bold text-white">Regresión funcional del endpoint</CardTitle>
                   {resultados && (
                     <Badge
                       variant="outline"

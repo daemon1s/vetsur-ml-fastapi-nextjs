@@ -8,7 +8,6 @@ interface FichaKpiProps {
   etiqueta: string
   valor: string
   detalle: string
-  colorAcento: string
   icono: LucideIcon
   cargando?: boolean
 }
@@ -20,12 +19,11 @@ export function FichaKpi({
   etiqueta,
   valor,
   detalle,
-  colorAcento,
   icono: Icono,
   cargando = false,
 }: FichaKpiProps) {
   return (
-    <div className={`rounded-xl border border-slate-800 bg-[#101b2d] p-4 border-t-2 ${colorAcento}`}>
+    <div className="rounded-xl border border-slate-800 bg-[#101b2d] p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold text-slate-400">{etiqueta}</p>
@@ -64,7 +62,6 @@ export function TarjetasKpiEjecutivas({ kpis, cargando = false }: TarjetasKpiPro
         etiqueta="Tasa de retención global"
         valor={tasaRetencion}
         detalle={`${formatearNumero(total)} pacientes en las 8 clínicas`}
-        colorAcento="border-t-[#16a085]"
         icono={TrendingUp}
         cargando={cargando}
       />
@@ -72,7 +69,6 @@ export function TarjetasKpiEjecutivas({ kpis, cargando = false }: TarjetasKpiPro
         etiqueta="Pacientes en riesgo alto"
         valor={formatearNumero(riesgoAlto)}
         detalle="Probabilidad de abandono mayor a 65%"
-        colorAcento="border-t-[#e74c3c]"
         icono={AlertTriangle}
         cargando={cargando}
       />
@@ -80,7 +76,6 @@ export function TarjetasKpiEjecutivas({ kpis, cargando = false }: TarjetasKpiPro
         etiqueta="Ventana preventiva"
         valor={formatearNumero(ventanaPreventiva)}
         detalle="Entre 30 y 90 días sin visita"
-        colorAcento="border-t-[#f39c12]"
         icono={Clock}
         cargando={cargando}
       />
@@ -88,7 +83,6 @@ export function TarjetasKpiEjecutivas({ kpis, cargando = false }: TarjetasKpiPro
         etiqueta="Pacientes activos"
         valor={formatearNumero(activos)}
         detalle="Menos de 30 días desde su última visita"
-        colorAcento="border-t-[#3498db]"
         icono={HeartPulse}
         cargando={cargando}
       />

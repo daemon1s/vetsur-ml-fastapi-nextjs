@@ -58,7 +58,6 @@ export function GraficoCurvaRoc({
 
   return (
     <div className="relative w-full overflow-hidden select-none">
-      {/* Leyenda superior estática y limpia */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2 px-1 text-xs">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
@@ -73,7 +72,7 @@ export function GraficoCurvaRoc({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-[#e74c3c] ring-2 ring-[#e74c3c]/30 inline-block" />
-            <span className="text-slate-300 font-medium">Operación (Umbral 0.5)</span>
+            <span className="text-slate-300 font-medium">Operación (umbral 0.5)</span>
           </div>
         </div>
       </div>
@@ -85,20 +84,17 @@ export function GraficoCurvaRoc({
         className="h-auto w-full rounded-xl bg-slate-950/60 border border-slate-800/80 p-1"
       >
         <defs>
-          {/* Gradiente para el área bajo la curva */}
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#16a085" stopOpacity="0.32" />
             <stop offset="60%" stopColor="#16a085" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#16a085" stopOpacity="0.01" />
           </linearGradient>
 
-          {/* Filtro de brillo sutil para la curva */}
           <filter id={glowFilterId} x="-10%" y="-10%" width="120%" height="120%">
             <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#16a085" floodOpacity="0.45" />
           </filter>
         </defs>
 
-        {/* Fondo del área de plot con cuadrícula */}
         <rect
           x={MARGIN_LEFT}
           y={MARGIN_TOP}
@@ -109,14 +105,12 @@ export function GraficoCurvaRoc({
           rx="4"
         />
 
-        {/* Líneas de cuadrícula horizontales y verticales */}
         {TICKS.map((t) => {
           const x = MARGIN_LEFT + t * PLOT_W
           const y = MARGIN_TOP + (1 - t) * PLOT_H
 
           return (
             <g key={`grid-${t}`}>
-              {/* Línea horizontal */}
               <line
                 x1={MARGIN_LEFT}
                 y1={y}
@@ -127,7 +121,6 @@ export function GraficoCurvaRoc({
                 strokeDasharray="3 3"
                 strokeOpacity={t === 0 || t === 1 ? 0.6 : 0.35}
               />
-              {/* Etiqueta eje Y */}
               <text
                 x={MARGIN_LEFT - 8}
                 y={y + 3.5}
@@ -137,7 +130,6 @@ export function GraficoCurvaRoc({
                 {t.toFixed(1)}
               </text>
 
-              {/* Línea vertical */}
               <line
                 x1={x}
                 y1={MARGIN_TOP}
@@ -148,7 +140,6 @@ export function GraficoCurvaRoc({
                 strokeDasharray="3 3"
                 strokeOpacity={t === 0 || t === 1 ? 0.6 : 0.35}
               />
-              {/* Etiqueta eje X */}
               <text
                 x={x}
                 y={MARGIN_TOP + PLOT_H + 16}
@@ -161,7 +152,6 @@ export function GraficoCurvaRoc({
           )
         })}
 
-        {/* Diagonal de clasificación por azar (AUC = 0.5) */}
         <line
           x1={MARGIN_LEFT}
           y1={MARGIN_TOP + PLOT_H}
@@ -173,7 +163,6 @@ export function GraficoCurvaRoc({
           strokeOpacity="0.8"
         />
 
-        {/* Área sombreada bajo la curva (AUC) */}
         {polygonPoints && (
           <polygon
             points={polygonPoints}
@@ -181,7 +170,6 @@ export function GraficoCurvaRoc({
           />
         )}
 
-        {/* Trazo de la curva ROC */}
         {puntosString && (
           <polyline
             points={puntosString}
@@ -194,7 +182,6 @@ export function GraficoCurvaRoc({
           />
         )}
 
-        {/* Puntos individuales discretos si son pocos */}
         {puntosSvg.length <= 30 &&
           puntosSvg.map((p, idx) => (
             <circle
@@ -209,7 +196,6 @@ export function GraficoCurvaRoc({
             />
           ))}
 
-        {/* Punto de Operación Actual (Umbral 0.5) - Estático */}
         <g>
           <circle
             cx={xOperacion}
@@ -227,7 +213,6 @@ export function GraficoCurvaRoc({
             strokeWidth="1.5"
           />
 
-          {/* Líneas guía punteadas hacia los ejes desde el punto de operación */}
           <line
             x1={xOperacion}
             y1={yOperacion}
@@ -250,7 +235,6 @@ export function GraficoCurvaRoc({
           />
         </g>
 
-        {/* Rótulo Eje X */}
         <text
           x={MARGIN_LEFT + PLOT_W / 2}
           y={MARGIN_TOP + PLOT_H + 36}
@@ -260,7 +244,6 @@ export function GraficoCurvaRoc({
           Falsas alarmas (alertas sobre pacientes que sí regresaron)
         </text>
 
-        {/* Rótulo Eje Y */}
         <text
           x={-(MARGIN_TOP + PLOT_H / 2)}
           y="18"

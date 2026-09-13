@@ -64,7 +64,6 @@ export default function CensoPage() {
             etiqueta="Total del censo"
             valor={formatearNumero(total)}
             detalle="Pacientes activos registrados en la red"
-            colorAcento="border-t-[#3498db]"
             icono={Users}
             cargando={cargando}
           />
@@ -72,7 +71,6 @@ export default function CensoPage() {
             etiqueta="Pacientes en riesgo alto"
             valor={formatearNumero(riesgoAlto)}
             detalle="Probabilidad de abandono mayor a 65%"
-            colorAcento="border-t-[#e74c3c]"
             icono={AlertOctagon}
             cargando={cargando}
           />
@@ -80,7 +78,6 @@ export default function CensoPage() {
             etiqueta="Ventana preventiva"
             valor={formatearNumero(visitas90)}
             detalle="Entre 30 y 90 días sin visita"
-            colorAcento="border-t-[#f39c12]"
             icono={Clock}
             cargando={cargando}
           />
@@ -88,7 +85,6 @@ export default function CensoPage() {
             etiqueta="Retención global"
             valor={tasaRetencion}
             detalle="Estimación del modelo sobre el censo activo"
-            colorAcento="border-t-[#16a085]"
             icono={TrendingUp}
             cargando={cargando}
           />
