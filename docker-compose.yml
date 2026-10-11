@@ -1,9 +1,7 @@
 services:
-  api:
+  vetsur-api:
     image: ghcr.io/daemon1s/vetsur-api:latest
     build: ./api
-    ports:
-      - "8008:8008"
     mem_limit: 512m
     restart: always
     volumes:
@@ -13,16 +11,18 @@ services:
       - ./api/caso1_vetsur.csv:/app/caso1_vetsur.csv
       - ./api/data:/app/data
     env_file: .env
+    networks:
+      - interna
 
-  frontend:
+  vetsur-frontend:
     image: ghcr.io/daemon1s/vetsur-frontend:latest
-    ports:
-      - "3000:3000"
     mem_limit: 512m
     restart: always
     depends_on:
-      - api
+      - vetsur-api
     env_file: .env
+    networks:
+      - interna
 
   nginx:
     image: nginx:alpine
@@ -31,11 +31,16 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     depends_on:
-      - api
-      - frontend
+      - vetsur-api
+      - vetsur-frontend
     restart: always
+    networks:
+      - interna
+      - proxy-network
 
 networks:
-  default:
-    name: proxy-network
+  interna:
+    name: vetsur-ml-fastapi-nextjs_internal
+    external: true
+  proxy-network:
     external: true
