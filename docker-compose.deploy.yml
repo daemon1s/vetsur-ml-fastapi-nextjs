@@ -1,0 +1,28 @@
+services:
+  vetsur-api:
+    build: ./api
+    image: vetsur-api:local
+    mem_limit: 512m
+    restart: always
+    volumes:
+      - ./api/modelo_vetsur.pkl:/app/modelo_vetsur.pkl
+      - ./api/columnas_vetsur.json:/app/columnas_vetsur.json
+      - ./api/imputaciones_vetsur.json:/app/imputaciones_vetsur.json
+      - ./api/caso1_vetsur.csv:/app/caso1_vetsur.csv
+      - ./api/data:/app/data
+    env_file: .env
+    ports:
+      - "127.0.0.1:8008:8008"
+  vetsur-frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: https://vetsur.daemonize.me/api
+    image: vetsur-frontend:local
+    mem_limit: 512m
+    restart: always
+    depends_on:
+      - vetsur-api
+    env_file: .env
+    ports:
+      - "127.0.0.1:3202:3000"
